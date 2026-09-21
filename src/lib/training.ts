@@ -274,7 +274,7 @@ const SPORT_WORK: Record<Exclude<SportId, "ninguno">, Exercise[]> = {
     { name: "Hollow hold", sets: 3, reps: "30 s", restSec: 45 },
   ],
   ciclismo: [
-    { name: "Sentadilla frontal", sets 	: 4, reps: "8", restSec: 110, loadFactor: 0.75 },
+    { name: "Sentadilla frontal", sets: 4, reps: "8", restSec: 110, loadFactor: 0.75 },
     { name: "Step-up al cajón", sets: 4, reps: "10 por pierna", restSec: 80, loadFactor: 0.25 },
     { name: "Plancha lateral", sets: 3, reps: "40 s", restSec: 45 },
   ],
