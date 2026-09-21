@@ -50,12 +50,16 @@ export function Plate({
     <div
       style={{ width: size, height: size }}
       className={cn(
-        "grid place-items-center rounded-full plate-hole",
+        "grid place-items-center rounded-full",
         active ? "plate-active" : "plate",
         className,
       )}
     >
-      {children}
+      <div
+        style={{ width: Math.max(6, size * 0.3), height: Math.max(6, size * 0.3) }}
+        className="plate-hole absolute rounded-full"
+      />
+      <div className="relative">{children}</div>
     </div>
   );
 }
