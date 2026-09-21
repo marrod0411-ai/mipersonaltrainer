@@ -70,7 +70,7 @@ function PlanScreen() {
 
       <div className="space-y-4 px-5 pb-10">
         {plan.map((s, i) => (
-          <Card key={s.title} className="rise" style-delay={i}>
+          <Card key={s.title} className="rise">
             <div className="flex items-start justify-between">
               <div>
                 <Label className="tracking-[0.18em]">
