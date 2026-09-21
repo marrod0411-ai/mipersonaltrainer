@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanRouteImport } from './routes/plan'
+import { Route as ProgresoRouteImport } from './routes/progreso'
 import { Route as SesionIndexRouteImport } from './routes/sesion.$index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +20,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlanRoute = PlanRouteImport.update({
   id: '/plan',
   path: '/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgresoRoute = ProgresoRouteImport.update({
+  id: '/progreso',
+  path: '/progreso',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SesionIndexRoute = SesionIndexRouteImport.update({
@@ -31,31 +43,39 @@ const SesionIndexRoute = SesionIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
+  '/progreso': typeof ProgresoRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
+  '/progreso': typeof ProgresoRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
+  '/progreso': typeof ProgresoRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/plan' | '/sesion/$index'
+  fullPaths: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/plan' | '/sesion/$index'
-  id: '__root__' | '/' | '/plan' | '/sesion/$index'
+  to: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
+  id: '__root__' | '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PerfilRoute: typeof PerfilRoute
   PlanRoute: typeof PlanRoute
+  ProgresoRoute: typeof ProgresoRoute
   SesionIndexRoute: typeof SesionIndexRoute
 }
 
@@ -68,11 +88,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plan': {
       id: '/plan'
       path: '/plan'
       fullPath: '/plan'
       preLoaderRoute: typeof PlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progreso': {
+      id: '/progreso'
+      path: '/progreso'
+      fullPath: '/progreso'
+      preLoaderRoute: typeof ProgresoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sesion/$index': {
@@ -87,7 +121,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PerfilRoute: PerfilRoute,
   PlanRoute: PlanRoute,
+  ProgresoRoute: ProgresoRoute,
   SesionIndexRoute: SesionIndexRoute,
 }
 export const routeTree = rootRouteImport
