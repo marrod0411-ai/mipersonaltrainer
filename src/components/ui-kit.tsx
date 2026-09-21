@@ -50,7 +50,7 @@ export function Plate({
     <div
       style={{ width: size, height: size }}
       className={cn(
-        "grid place-items-center rounded-full",
+        "relative grid place-items-center rounded-full",
         active ? "plate-active" : "plate",
         className,
       )}
