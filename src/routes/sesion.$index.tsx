@@ -1,0 +1,227 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import {
+  Card,
+  Chip,
+  FlameButton,
+  Label,
+  Plate,
+  ProgressBar,
+  Screen,
+  TabBar,
+} from "@/components/ui-kit";
+import { useLog, useProfile } from "@/lib/store";
+import { METHODS, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
+
+export const Route = createFileRoute("/sesion/$index")({
+  head: () => ({
+    meta: [
+      { title: "Sesión de entrenamiento — Coach de Hierro" },
+      {
+        name: "description",
+        content:
+          "Sigue tu sesión serie por serie con cargas recomendadas, descansos y registro de repeticiones.",
+      },
+      { property: "og:title", content: "Sesión de entrenamiento — Coach de Hierro" },
+      {
+        property: "og:description",
+        content: "Registra cada serie y deja que el coach ajuste tu carga progresiva.",
+      },
+    ],
+  }),
+  component: SessionScreen,
+});
+
+function SessionScreen() {
+  const { index } = Route.useParams();
+  const navigate = useNavigate();
+  const { profile, loaded } = useProfile();
+  const { log, addSet, completeSession } = useLog();
+  const [exIndex, setExIndex] = useState(0);
+  const [doneSets, setDoneSets] = useState<Record<string, number>>({});
+  const [repsInput, setRepsInput] = useState(8);
+  const [loadOverride, setLoadOverride] = useState<Record<string, number>>({});
+
+  const plan = useMemo(() => (profile ? buildPlan(profile, log.week) : []), [profile, log.week]);
+  const session = plan[Number(index)];
+
+  if (!loaded) return <Screen />;
+  if (!profile || !session)
+    return (
+      <Screen>
+        <div className="px-5 pt-16 text-center">
+          <div className="font-display text-[24px]">SIN SESIÓN</div>
+          <Link to="/" className="mt-4 inline-block font-mono text-[11px] text-flame">
+            VOLVER AL INICIO
+          </Link>
+        </div>
+      </Screen>
+    );
+
+  const exercise = session.exercises[exIndex];
+  const base = recommendedLoad(exercise, {
+    bodyWeight: profile.bodyWeight,
+    level: profile.level,
+    goal: profile.goal,
+    week: log.week,
+  });
+  const load = loadOverride[exercise.name] ?? base;
+  const done = doneSets[exercise.name] ?? 0;
+  const totalSets = session.exercises.reduce((n, e) => n + e.sets, 0);
+  const totalDone = Object.values(doneSets).reduce((a, b) => a + b, 0);
+
+  const logSet = () => {
+    addSet({
+      session: session.title,
+      exercise: exercise.name,
+      setIndex: done + 1,
+      kg: load,
+      reps: repsInput,
+    });
+    setDoneSets((p) => ({ ...p, [exercise.name]: Math.min(exercise.sets, done + 1) }));
+  };
+
+  const finish = () => {
+    completeSession(session.title);
+    navigate({ to: "/progreso" });
+  };
+
+  return (
+    <Screen>
+      <header className="flex items-center justify-between px-5 pb-4 pt-7 rise">
+        <div>
+          <div className="font-display text-[11px] tracking-[0.25em] text-flame">
+            {METHODS[session.method].label.toUpperCase()} · {session.minutes} MIN
+          </div>
+          <h1 className="font-display text-[26px] leading-none tracking-tight text-balance">
+            {session.title}
+          </h1>
+        </div>
+        <Link to="/" className="font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
+          Salir
+        </Link>
+      </header>
+
+      <section className="px-5 rise" style={{ animationDelay: "60ms" }}>
+        <Card>
+          <Label className="tracking-[0.18em]">Método de hoy</Label>
+          <div className="mt-1 font-display text-[20px] leading-none tracking-tight">
+            {METHODS[session.method].label.toUpperCase()}
+          </div>
+          <p className="mt-2 text-[13px] leading-relaxed text-mute">
+            {METHODS[session.method].detail}
+          </p>
+        </Card>
+      </section>
+
+      <section className="mt-6 px-5 rise" style={{ animationDelay: "120ms" }}>
+        <Label className="mb-2">Ejercicios</Label>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {session.exercises.map((e, i) => (
+            <Chip
+              key={e.name}
+              active={i === exIndex}
+              onClick={() => {
+                setExIndex(i);
+                setRepsInput(parseInt(e.reps, 10) || 10);
+              }}
+              className="shrink-0"
+            >
+              <div className="font-mono text-[9px] opacity-70">
+                {(doneSets[e.name] ?? 0)}/{e.sets}
+              </div>
+              <div className="mt-0.5 font-display text-[13px] tracking-tight">
+                {e.name.toUpperCase()}
+              </div>
+            </Chip>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-6 px-5 rise" style={{ animationDelay: "180ms" }}>
+        <Label className="mb-2">Sesión activa</Label>
+        <Card>
+          <div className="font-display text-[20px] leading-none tracking-tight text-balance">
+            {exercise.name.toUpperCase()} · SERIE {Math.min(done + 1, exercise.sets)}/
+            {exercise.sets}
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex gap-2">
+              {Array.from({ length: Math.min(exercise.sets, 7) }).map((_, i) => (
+                <Plate key={i} size={28} active={i < done} className="click" />
+              ))}
+            </div>
+            <Label className="text-[10px] tracking-[0.15em]">Descanso {exercise.restSec}s</Label>
+          </div>
+
+          <div className="mt-3 flex items-end justify-center gap-3">
+            <div className="font-display text-[64px] leading-[0.85] tracking-tight">
+              {load || "—"}
+            </div>
+            <div className="pb-1.5 font-display text-[20px] text-mute">KG</div>
+            <div className="ml-3 font-display text-[42px] leading-none tracking-tight text-flame">
+              ×{repsInput}
+            </div>
+          </div>
+
+          {base > 0 && (
+            <div className="mt-3 flex gap-2">
+              <Chip
+                onClick={() =>
+                  setLoadOverride((p) => ({
+                    ...p,
+                    [exercise.name]: roundLoad(Math.max(0, load - 2.5)),
+                  }))
+                }
+                className="flex-1 text-center font-display text-[16px]"
+              >
+                − 2.5
+              </Chip>
+              <Chip
+                onClick={() =>
+                  setLoadOverride((p) => ({ ...p, [exercise.name]: roundLoad(load + 2.5) }))
+                }
+                className="flex-1 text-center font-display text-[16px]"
+              >
+                + 2.5
+              </Chip>
+            </div>
+          )}
+
+          <div className="mt-2 flex gap-2">
+            <Chip
+              onClick={() => setRepsInput(Math.max(1, repsInput - 1))}
+              className="flex-1 text-center font-display text-[16px]"
+            >
+              − REP
+            </Chip>
+            <Chip
+              onClick={() => setRepsInput(repsInput + 1)}
+              className="flex-1 text-center font-display text-[16px]"
+            >
+              + REP
+            </Chip>
+          </div>
+
+          <FlameButton className="mt-3" onClick={logSet}>
+            REGISTRAR SERIE
+          </FlameButton>
+
+          <ProgressBar value={(totalDone / totalSets) * 100} />
+          <div className="mt-1.5 flex justify-between font-mono text-[9px] uppercase tracking-[0.15em] text-mute">
+            <span>
+              {totalDone} de {totalSets} series
+            </span>
+            <span>Objetivo {exercise.reps} reps</span>
+          </div>
+        </Card>
+      </section>
+
+      <section className="mt-6 px-5 pb-10 rise" style={{ animationDelay: "240ms" }}>
+        <FlameButton onClick={finish}>TERMINAR SESIÓN</FlameButton>
+      </section>
+
+      <TabBar />
+    </Screen>
+  );
+}
