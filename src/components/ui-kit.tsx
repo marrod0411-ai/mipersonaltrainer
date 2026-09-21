@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children }: { children?: ReactNode }) {
   return (
     <div className="mx-auto min-h-screen w-full max-w-[430px] bg-bg pb-24 text-ink">{children}</div>
   );

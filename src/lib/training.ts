@@ -424,7 +424,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
 
   return trimmed.map((s, i) => ({
     ...s,
-    day: DAYS[i % 7],
+    day: DAYS[i % 7] ?? "",
     method: isDeload && s.exercises.some((e) => e.loadFactor) ? "descarga" : s.method,
     minutes: isDeload ? Math.round(s.minutes * 0.7) : s.minutes,
   }));

@@ -58,7 +58,7 @@ function SessionScreen() {
       </Screen>
     );
 
-  const exercise = session.exercises[exIndex];
+  const exercise = session.exercises[exIndex]!;
   const base = recommendedLoad(exercise, {
     bodyWeight: profile.bodyWeight,
     level: profile.level,

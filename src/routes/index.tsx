@@ -74,7 +74,7 @@ function Index() {
   if (!session) return <Screen />;
 
   const doneToday = plan.filter((s) => isSessionDoneToday(log, s.title)).length;
-  const mainLift = session.exercises.find((e) => e.loadFactor) ?? session.exercises[0];
+  const mainLift = (session.exercises.find((e) => e.loadFactor) ?? session.exercises[0])!;
   const load = recommendedLoad(mainLift, {
     bodyWeight: profile.bodyWeight,
     level: profile.level,
