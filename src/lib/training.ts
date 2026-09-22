@@ -124,6 +124,22 @@ export const METHODS: Record<MethodId, { label: string; detail: string }> = {
   sport: { label: "Específico", detail: "Transferencia directa a tu deporte." },
 };
 
+export type GymId = "casa" | "basico" | "completo" | "premium";
+
+export const GYMS: { id: GymId; label: string; blurb: string }[] = [
+  { id: "casa", label: "En casa", blurb: "Peso corporal, mancuernas y bandas" },
+  { id: "basico", label: "Gym básico", blurb: "Barras, discos, banco y poleas simples" },
+  { id: "completo", label: "Gym completo", blurb: "Máquinas, poleas cruzadas y agarres" },
+  { id: "premium", label: "Gym premium", blurb: "Hack, convergentes y máquinas de marca" },
+];
+
+export const GYM_TIER: Record<GymId, number> = {
+  casa: 0,
+  basico: 1,
+  completo: 2,
+  premium: 3,
+};
+
 export type Exercise = {
   name: string;
   sets: number;
@@ -131,7 +147,10 @@ export type Exercise = {
   restSec: number;
   /** fraction of body weight used as a baseline load estimate */
   loadFactor?: number;
+  /** equipment level needed: 0 casa, 1 básico, 2 completo, 3 premium */
+  tier?: number;
 };
+
 
 export type Session = {
   day: string;
@@ -330,7 +349,23 @@ export type Profile = {
   daysPerWeek: number;
   reminderTime: string;
   reminderDays: number[];
+  /** gym equipment available */
+  gym?: GymId;
+  sex?: "hombre" | "mujer";
+  age?: number;
+  height?: number;
+  neck?: number;
+  waist?: number;
+  hip?: number;
+  known?: {
+    bodyFat?: number;
+    water?: number;
+    muscleMass?: number;
+    visceral?: number;
+    bmi?: number;
+  };
 };
+
 
 /** Builds the weekly plan from the profile. Week 4, 8, 12... become deload weeks. */
 export function buildPlan(profile: Profile, week = 1): Session[] {
