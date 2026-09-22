@@ -201,110 +201,238 @@ export function recommendedLoad(
   return roundLoad(raw);
 }
 
-const PUSH: Exercise[] = [
-  { name: "Press banca", sets: 4, reps: "8", restSec: 120, loadFactor: 0.8 },
-  { name: "Press inclinado con mancuernas", sets: 4, reps: "10", restSec: 90, loadFactor: 0.28 },
-  { name: "Aperturas en polea", sets: 7, reps: "10-12", restSec: 40, loadFactor: 0.14 },
-  { name: "Fondos en paralelas", sets: 3, reps: "10-12", restSec: 90 },
-  { name: "Extensión de tríceps en cuerda", sets: 4, reps: "12", restSec: 60, loadFactor: 0.22 },
-];
+type Pool = { anchors: Exercise[]; acc: Exercise[] };
 
-const PULL: Exercise[] = [
-  { name: "Peso muerto", sets: 4, reps: "6", restSec: 150, loadFactor: 1.1 },
-  { name: "Remo con barra", sets: 4, reps: "8-10", restSec: 100, loadFactor: 0.6 },
-  { name: "Jalón al pecho", sets: 4, reps: "10-12", restSec: 80, loadFactor: 0.55 },
-  { name: "Remo en polea baja", sets: 7, reps: "10-12", restSec: 40, loadFactor: 0.45 },
-  { name: "Curl con barra", sets: 4, reps: "10", restSec: 60, loadFactor: 0.3 },
-];
+function availableIn(list: Exercise[], gym: GymId) {
+  const t = GYM_TIER[gym];
+  const f = list.filter((e) => (e.tier ?? 1) <= t);
+  return f.length ? f : list.filter((e) => (e.tier ?? 1) <= 1);
+}
 
-const LEGS: Exercise[] = [
-  { name: "Sentadilla trasera", sets: 5, reps: "8-6-4", restSec: 150, loadFactor: 1 },
-  { name: "Prensa 45°", sets: 4, reps: "12", restSec: 110, loadFactor: 1.6 },
-  { name: "Peso muerto rumano", sets: 4, reps: "10", restSec: 100, loadFactor: 0.75 },
-  { name: "Extensión de cuádriceps", sets: 7, reps: "12", restSec: 40, loadFactor: 0.45 },
-  { name: "Elevación de gemelos", sets: 4, reps: "15", restSec: 50, loadFactor: 0.7 },
-];
+/** Rotates the exercise selection week by week so the routine never repeats flat. */
+function pick(list: Exercise[], gym: GymId, count: number, week: number, seed = 0) {
+  const a = availableIn(list, gym);
+  if (!a.length) return [];
+  const out: Exercise[] = [];
+  const start = Math.abs((week - 1) * count + seed) % a.length;
+  for (let i = 0; i < Math.min(count, a.length); i++) out.push(a[(start + i) % a.length]!);
+  return out;
+}
 
-const SHOULDERS: Exercise[] = [
-  { name: "Press militar de pie", sets: 4, reps: "8", restSec: 120, loadFactor: 0.5 },
-  { name: "Elevaciones laterales", sets: 5, reps: "12-15", restSec: 50, loadFactor: 0.09 },
-  { name: "Pájaros en banco", sets: 4, reps: "15", restSec: 50, loadFactor: 0.08 },
-  { name: "Encogimientos con barra", sets: 4, reps: "12", restSec: 60, loadFactor: 0.7 },
-];
+const PUSH: Pool = {
+  anchors: [
+    { name: "Press banca", sets: 4, reps: "8", restSec: 120, loadFactor: 0.8, tier: 1 },
+    { name: "Press inclinado con barra", sets: 4, reps: "8", restSec: 120, loadFactor: 0.65, tier: 1 },
+    { name: "Press banca con mancuernas", sets: 4, reps: "10", restSec: 100, loadFactor: 0.3, tier: 0 },
+    { name: "Press inclinado con mancuernas", sets: 4, reps: "10", restSec: 90, loadFactor: 0.28, tier: 0 },
+    { name: "Flexiones con déficit y lastre", sets: 4, reps: "12-15", restSec: 75, tier: 0 },
+    { name: "Press en máquina Hammer", sets: 4, reps: "10", restSec: 100, loadFactor: 0.9, tier: 2 },
+    { name: "Press declinado en multipower", sets: 4, reps: "10", restSec: 100, loadFactor: 0.7, tier: 2 },
+    { name: "Press convergente inclinado 30°", sets: 4, reps: "8-10", restSec: 110, loadFactor: 0.85, tier: 3 },
+    { name: "Fondos en paralelas lastrados", sets: 4, reps: "8-10", restSec: 100, tier: 1 },
+  ],
+  acc: [
+    { name: "Aperturas con mancuernas en banco inclinado", sets: 4, reps: "12", restSec: 60, loadFactor: 0.12, tier: 0 },
+    { name: "Cruce en polea alta", sets: 7, reps: "10-12", restSec: 40, loadFactor: 0.14, tier: 2 },
+    { name: "Cruce en polea baja a pecho alto", sets: 4, reps: "12-15", restSec: 50, loadFactor: 0.13, tier: 2 },
+    { name: "Cruce unilateral en polea media", sets: 4, reps: "12 por lado", restSec: 45, loadFactor: 0.1, tier: 2 },
+    { name: "Pec deck", sets: 4, reps: "12-15", restSec: 50, loadFactor: 0.35, tier: 2 },
+    { name: "Extensión de tríceps en cuerda", sets: 4, reps: "12", restSec: 60, loadFactor: 0.22, tier: 2 },
+    { name: "Extensión de tríceps agarre inverso en polea", sets: 4, reps: "12 por brazo", restSec: 50, loadFactor: 0.14, tier: 2 },
+    { name: "Extensión sobre la cabeza en polea baja", sets: 4, reps: "12", restSec: 55, loadFactor: 0.2, tier: 2 },
+    { name: "Press francés con barra Z", sets: 4, reps: "10", restSec: 70, loadFactor: 0.25, tier: 1 },
+    { name: "Patada de tríceps con mancuerna", sets: 3, reps: "15 por brazo", restSec: 45, loadFactor: 0.06, tier: 0 },
+    { name: "Fondos en máquina asistida", sets: 4, reps: "12", restSec: 60, tier: 2 },
+    { name: "Extensión de tríceps en máquina sentado", sets: 4, reps: "12-15", restSec: 50, loadFactor: 0.3, tier: 3 },
+  ],
+};
 
-const FULLBODY: Exercise[] = [
-  { name: "Sentadilla goblet", sets: 3, reps: "12", restSec: 75, loadFactor: 0.22 },
-  { name: "Press banca con mancuernas", sets: 3, reps: "12", restSec: 75, loadFactor: 0.24 },
-  { name: "Remo con mancuerna", sets: 3, reps: "12", restSec: 75, loadFactor: 0.24 },
-  { name: "Plancha", sets: 3, reps: "40 s", restSec: 45 },
-];
+const PULL: Pool = {
+  anchors: [
+    { name: "Peso muerto convencional", sets: 4, reps: "6", restSec: 150, loadFactor: 1.1, tier: 1 },
+    { name: "Peso muerto sumo", sets: 4, reps: "6", restSec: 150, loadFactor: 1.15, tier: 1 },
+    { name: "Remo con barra agarre prono", sets: 4, reps: "8-10", restSec: 100, loadFactor: 0.6, tier: 1 },
+    { name: "Remo Pendlay", sets: 4, reps: "6-8", restSec: 110, loadFactor: 0.6, tier: 1 },
+    { name: "Remo en barra T agarre neutro", sets: 4, reps: "10", restSec: 100, loadFactor: 0.55, tier: 2 },
+    { name: "Dominadas agarre prono ancho", sets: 4, reps: "8", restSec: 100, tier: 0 },
+    { name: "Dominadas agarre supino", sets: 4, reps: "8-10", restSec: 90, tier: 0 },
+    { name: "Remo con mancuerna a un brazo", sets: 4, reps: "10 por lado", restSec: 80, loadFactor: 0.25, tier: 0 },
+    { name: "Remo en máquina Hammer unilateral", sets: 4, reps: "10 por lado", restSec: 90, loadFactor: 0.5, tier: 2 },
+    { name: "Jalón al pecho agarre ancho", sets: 4, reps: "10-12", restSec: 80, loadFactor: 0.55, tier: 1 },
+    { name: "Jalón agarre neutro cerrado", sets: 4, reps: "10-12", restSec: 80, loadFactor: 0.5, tier: 1 },
+  ],
+  acc: [
+    { name: "Remo en polea baja con triángulo", sets: 7, reps: "10-12", restSec: 40, loadFactor: 0.45, tier: 1 },
+    { name: "Remo sentado en polea agarre ancho", sets: 4, reps: "12", restSec: 60, loadFactor: 0.4, tier: 2 },
+    { name: "Pull-over en polea alta con barra recta", sets: 4, reps: "12-15", restSec: 50, loadFactor: 0.3, tier: 2 },
+    { name: "Face pull en polea alta", sets: 4, reps: "15", restSec: 45, loadFactor: 0.15, tier: 2 },
+    { name: "Remo en polea alta unilateral arrodillado", sets: 4, reps: "12 por lado", restSec: 45, loadFactor: 0.15, tier: 2 },
+    { name: "Encogimientos en polea alta", sets: 4, reps: "15", restSec: 45, loadFactor: 0.4, tier: 2 },
+    { name: "Curl con barra recta", sets: 4, reps: "10", restSec: 60, loadFactor: 0.3, tier: 1 },
+    { name: "Curl con barra Z agarre ancho", sets: 4, reps: "10-12", restSec: 60, loadFactor: 0.28, tier: 1 },
+    { name: "Curl martillo con mancuernas", sets: 4, reps: "12", restSec: 55, loadFactor: 0.12, tier: 0 },
+    { name: "Curl inclinado en banco a 60°", sets: 3, reps: "12", restSec: 55, loadFactor: 0.1, tier: 0 },
+    { name: "Curl en polea baja con cuerda", sets: 4, reps: "12-15", restSec: 45, loadFactor: 0.2, tier: 2 },
+    { name: "Curl predicador en máquina", sets: 4, reps: "12", restSec: 50, loadFactor: 0.25, tier: 3 },
+  ],
+};
+
+const LEGS: Pool = {
+  anchors: [
+    { name: "Sentadilla trasera", sets: 5, reps: "8-6-4", restSec: 150, loadFactor: 1, tier: 1 },
+    { name: "Sentadilla frontal", sets: 4, reps: "8", restSec: 130, loadFactor: 0.75, tier: 1 },
+    { name: "Sentadilla en multipower", sets: 4, reps: "10", restSec: 120, loadFactor: 0.9, tier: 2 },
+    { name: "Hack squat", sets: 4, reps: "10-12", restSec: 120, loadFactor: 1.3, tier: 3 },
+    { name: "Prensa 45°", sets: 4, reps: "12", restSec: 110, loadFactor: 1.6, tier: 2 },
+    { name: "Prensa horizontal", sets: 4, reps: "12-15", restSec: 100, loadFactor: 1.4, tier: 2 },
+    { name: "Peso muerto rumano", sets: 4, reps: "10", restSec: 100, loadFactor: 0.75, tier: 1 },
+    { name: "Zancadas caminando con barra", sets: 4, reps: "10 por pierna", restSec: 90, loadFactor: 0.4, tier: 1 },
+    { name: "Sentadilla búlgara con mancuernas", sets: 4, reps: "10 por pierna", restSec: 90, loadFactor: 0.25, tier: 0 },
+    { name: "Sentadilla goblet", sets: 4, reps: "12", restSec: 75, loadFactor: 0.22, tier: 0 },
+  ],
+  acc: [
+    { name: "Extensión de cuádriceps", sets: 7, reps: "12", restSec: 40, loadFactor: 0.45, tier: 2 },
+    { name: "Extensión unilateral de cuádriceps", sets: 4, reps: "12 por pierna", restSec: 45, loadFactor: 0.2, tier: 2 },
+    { name: "Curl femoral tumbado", sets: 4, reps: "12", restSec: 60, loadFactor: 0.35, tier: 2 },
+    { name: "Curl femoral sentado", sets: 4, reps: "12-15", restSec: 55, loadFactor: 0.35, tier: 2 },
+    { name: "Curl nórdico de isquios", sets: 4, reps: "6", restSec: 90, tier: 0 },
+    { name: "Hip thrust con barra", sets: 4, reps: "10", restSec: 100, loadFactor: 0.9, tier: 1 },
+    { name: "Abductores en máquina", sets: 4, reps: "15", restSec: 45, loadFactor: 0.4, tier: 2 },
+    { name: "Aductores en máquina", sets: 4, reps: "15", restSec: 45, loadFactor: 0.35, tier: 2 },
+    { name: "Patada de glúteo en polea baja", sets: 4, reps: "12 por lado", restSec: 45, loadFactor: 0.15, tier: 2 },
+    { name: "Peso muerto a una pierna con polea", sets: 3, reps: "10 por lado", restSec: 60, loadFactor: 0.2, tier: 2 },
+    { name: "Elevación de gemelos de pie", sets: 4, reps: "15", restSec: 50, loadFactor: 0.7, tier: 1 },
+    { name: "Gemelo sentado en máquina", sets: 4, reps: "18", restSec: 45, loadFactor: 0.5, tier: 2 },
+  ],
+};
+
+const SHOULDERS: Pool = {
+  anchors: [
+    { name: "Press militar de pie", sets: 4, reps: "8", restSec: 120, loadFactor: 0.5, tier: 1 },
+    { name: "Press Arnold con mancuernas", sets: 4, reps: "10", restSec: 90, loadFactor: 0.22, tier: 0 },
+    { name: "Press de hombro en máquina", sets: 4, reps: "10-12", restSec: 90, loadFactor: 0.5, tier: 2 },
+    { name: "Press tras nuca en multipower", sets: 4, reps: "10", restSec: 100, loadFactor: 0.4, tier: 2 },
+  ],
+  acc: [
+    { name: "Elevaciones laterales con mancuernas", sets: 5, reps: "12-15", restSec: 50, loadFactor: 0.09, tier: 0 },
+    { name: "Elevación lateral en polea baja unilateral", sets: 4, reps: "15 por lado", restSec: 45, loadFactor: 0.07, tier: 2 },
+    { name: "Elevación lateral en máquina", sets: 4, reps: "12-15", restSec: 45, loadFactor: 0.25, tier: 3 },
+    { name: "Pájaros en banco inclinado", sets: 4, reps: "15", restSec: 50, loadFactor: 0.08, tier: 0 },
+    { name: "Reverse pec deck", sets: 4, reps: "15", restSec: 45, loadFactor: 0.25, tier: 2 },
+    { name: "Elevación frontal con disco", sets: 3, reps: "15", restSec: 45, loadFactor: 0.15, tier: 1 },
+    { name: "Encogimientos con barra", sets: 4, reps: "12", restSec: 60, loadFactor: 0.7, tier: 1 },
+    { name: "Rueda abdominal", sets: 4, reps: "12", restSec: 50, tier: 1 },
+    { name: "Crunch en polea alta arrodillado", sets: 4, reps: "15", restSec: 45, loadFactor: 0.25, tier: 2 },
+    { name: "Elevación de piernas colgado", sets: 4, reps: "12", restSec: 50, tier: 0 },
+    { name: "Plancha con lastre", sets: 3, reps: "45 s", restSec: 45, tier: 0 },
+  ],
+};
+
+const FULLBODY: Pool = {
+  anchors: [
+    { name: "Sentadilla goblet", sets: 4, reps: "12", restSec: 75, loadFactor: 0.22, tier: 0 },
+    { name: "Press banca con mancuernas", sets: 4, reps: "12", restSec: 75, loadFactor: 0.24, tier: 0 },
+    { name: "Peso muerto rumano con mancuernas", sets: 4, reps: "12", restSec: 80, loadFactor: 0.3, tier: 0 },
+    { name: "Remo con mancuerna a un brazo", sets: 4, reps: "12 por lado", restSec: 75, loadFactor: 0.24, tier: 0 },
+    { name: "Sentadilla trasera", sets: 4, reps: "8-10", restSec: 120, loadFactor: 0.9, tier: 1 },
+    { name: "Jalón al pecho agarre neutro", sets: 4, reps: "12", restSec: 70, loadFactor: 0.5, tier: 1 },
+  ],
+  acc: [
+    { name: "Plancha con lastre", sets: 3, reps: "45 s", restSec: 45, tier: 0 },
+    { name: "Elevaciones laterales con mancuernas", sets: 3, reps: "15", restSec: 45, loadFactor: 0.09, tier: 0 },
+    { name: "Curl martillo con mancuernas", sets: 3, reps: "12", restSec: 50, loadFactor: 0.12, tier: 0 },
+    { name: "Extensión de tríceps en cuerda", sets: 3, reps: "15", restSec: 45, loadFactor: 0.22, tier: 2 },
+    { name: "Hip thrust con barra", sets: 3, reps: "12", restSec: 75, loadFactor: 0.8, tier: 1 },
+    { name: "Face pull en polea alta", sets: 3, reps: "15", restSec: 45, loadFactor: 0.15, tier: 2 },
+  ],
+};
 
 const HIIT: Exercise[] = [
-  { name: "Sprint en bicicleta", sets: 8, reps: "25 s máx / 75 s suave", restSec: 75 },
-  { name: "Remo ergómetro", sets: 6, reps: "30 s fuerte", restSec: 60 },
-  { name: "Battle rope", sets: 5, reps: "20 s", restSec: 60 },
+  { name: "Sprint en bicicleta estática", sets: 8, reps: "25 s máx / 75 s suave", restSec: 75, tier: 1 },
+  { name: "Remo ergómetro", sets: 6, reps: "30 s fuerte", restSec: 60, tier: 1 },
+  { name: "Battle rope", sets: 5, reps: "20 s", restSec: 60, tier: 2 },
+  { name: "Sprint en cinta curva", sets: 8, reps: "20 s", restSec: 70, tier: 3 },
+  { name: "Trineo de empuje", sets: 6, reps: "20 m", restSec: 75, tier: 3 },
+  { name: "Burpees", sets: 6, reps: "30 s", restSec: 60, tier: 0 },
+  { name: "Salto a la cuerda doble", sets: 6, reps: "30 s", restSec: 55, tier: 0 },
+  { name: "Ski erg", sets: 6, reps: "30 s", restSec: 60, tier: 2 },
 ];
 
 const INTERVALOS: Exercise[] = [
-  { name: "Cinta en cuesta", sets: 6, reps: "3 min fuerte / 2 min suave", restSec: 120 },
-  { name: "Escaladora", sets: 4, reps: "2 min", restSec: 90 },
+  { name: "Cinta en cuesta", sets: 6, reps: "3 min fuerte / 2 min suave", restSec: 120, tier: 1 },
+  { name: "Escaladora", sets: 4, reps: "2 min", restSec: 90, tier: 2 },
+  { name: "Elíptica por intervalos", sets: 5, reps: "2 min", restSec: 90, tier: 1 },
+  { name: "Bicicleta de aire", sets: 5, reps: "90 s", restSec: 90, tier: 2 },
+  { name: "Caminata rápida por bloques", sets: 5, reps: "3 min", restSec: 90, tier: 0 },
 ];
 
 const PLIO: Exercise[] = [
-  { name: "Salto al cajón", sets: 5, reps: "5", restSec: 90 },
-  { name: "Salto amplio horizontal", sets: 4, reps: "4", restSec: 90 },
-  { name: "Skipping alto", sets: 4, reps: "20 s", restSec: 60 },
-  { name: "Movilidad de cadera 90/90", sets: 3, reps: "8 por lado", restSec: 45 },
+  { name: "Salto al cajón", sets: 5, reps: "5", restSec: 90, tier: 0 },
+  { name: "Salto amplio horizontal", sets: 4, reps: "4", restSec: 90, tier: 0 },
+  { name: "Salto en profundidad (drop jump)", sets: 4, reps: "5", restSec: 100, tier: 1 },
+  { name: "Skipping alto", sets: 4, reps: "20 s", restSec: 60, tier: 0 },
+  { name: "Movilidad de cadera 90/90", sets: 3, reps: "8 por lado", restSec: 45, tier: 0 },
+  { name: "Sentadilla con salto", sets: 4, reps: "6", restSec: 80, tier: 0 },
+  { name: "Lanzamiento de balón medicinal al suelo", sets: 5, reps: "6", restSec: 70, tier: 1 },
+];
+
+const LOW_IMPACT: Exercise[] = [
+  { name: "Empuje de trineo", sets: 6, reps: "20 m", restSec: 75, tier: 3 },
+  { name: "Step-up explosivo al cajón bajo", sets: 4, reps: "8 por pierna", restSec: 75, loadFactor: 0.15, tier: 0 },
+  { name: "Lanzamiento de balón medicinal al frente", sets: 5, reps: "6", restSec: 70, tier: 1 },
+  { name: "Movilidad de cadera 90/90", sets: 3, reps: "8 por lado", restSec: 45, tier: 0 },
+  { name: "Puente de glúteo con banda", sets: 3, reps: "15", restSec: 45, tier: 0 },
+  { name: "Remo ergómetro potente", sets: 5, reps: "20 s", restSec: 70, tier: 1 },
 ];
 
 const SPORT_WORK: Record<Exclude<SportId, "ninguno">, Exercise[]> = {
   futbol: [
-    { name: "Sentadilla búlgara", sets: 4, reps: "8 por pierna", restSec: 90, loadFactor: 0.25 },
-    { name: "Nórdico de isquios", sets: 4, reps: "6", restSec: 90 },
-    { name: "Cambios de dirección en conos", sets: 6, reps: "15 s", restSec: 60 },
-    { name: "Aductores en polea", sets: 3, reps: "12", restSec: 60, loadFactor: 0.12 },
+    { name: "Sentadilla búlgara", sets: 4, reps: "8 por pierna", restSec: 90, loadFactor: 0.25, tier: 0 },
+    { name: "Nórdico de isquios", sets: 4, reps: "6", restSec: 90, tier: 0 },
+    { name: "Cambios de dirección en conos", sets: 6, reps: "15 s", restSec: 60, tier: 0 },
+    { name: "Aductores en polea", sets: 3, reps: "12", restSec: 60, loadFactor: 0.12, tier: 2 },
   ],
   tenis: [
-    { name: "Rotación de tronco en polea", sets: 4, reps: "10 por lado", restSec: 60, loadFactor: 0.18 },
-    { name: "Lanzamiento de balón medicinal lateral", sets: 5, reps: "6", restSec: 75 },
-    { name: "Desplazamiento lateral con banda", sets: 4, reps: "20 s", restSec: 60 },
-    { name: "Rotadores externos de hombro", sets: 3, reps: "15", restSec: 45, loadFactor: 0.05 },
+    { name: "Rotación de tronco en polea", sets: 4, reps: "10 por lado", restSec: 60, loadFactor: 0.18, tier: 2 },
+    { name: "Lanzamiento de balón medicinal lateral", sets: 5, reps: "6", restSec: 75, tier: 1 },
+    { name: "Desplazamiento lateral con banda", sets: 4, reps: "20 s", restSec: 60, tier: 0 },
+    { name: "Rotadores externos de hombro", sets: 3, reps: "15", restSec: 45, loadFactor: 0.05, tier: 0 },
   ],
   voleibol: [
-    { name: "Salto vertical con contramovimiento", sets: 6, reps: "4", restSec: 90 },
-    { name: "Sentadilla con salto", sets: 4, reps: "5", restSec: 90, loadFactor: 0.3 },
-    { name: "Press por encima de la cabeza", sets: 4, reps: "8", restSec: 90, loadFactor: 0.45 },
-    { name: "Manguito rotador con banda", sets: 3, reps: "15", restSec: 45 },
+    { name: "Salto vertical con contramovimiento", sets: 6, reps: "4", restSec: 90, tier: 0 },
+    { name: "Sentadilla con salto", sets: 4, reps: "5", restSec: 90, loadFactor: 0.3, tier: 1 },
+    { name: "Press por encima de la cabeza", sets: 4, reps: "8", restSec: 90, loadFactor: 0.45, tier: 1 },
+    { name: "Manguito rotador con banda", sets: 3, reps: "15", restSec: 45, tier: 0 },
   ],
   basquetbol: [
-    { name: "Hip thrust", sets: 4, reps: "8", restSec: 100, loadFactor: 0.9 },
-    { name: "Salto a una pierna", sets: 5, reps: "5 por lado", restSec: 80 },
-    { name: "Paso lateral defensivo con banda", sets: 4, reps: "25 s", restSec: 60 },
-    { name: "Core anti-rotación", sets: 3, reps: "10 por lado", restSec: 45, loadFactor: 0.12 },
+    { name: "Hip thrust", sets: 4, reps: "8", restSec: 100, loadFactor: 0.9, tier: 1 },
+    { name: "Salto a una pierna", sets: 5, reps: "5 por lado", restSec: 80, tier: 0 },
+    { name: "Paso lateral defensivo con banda", sets: 4, reps: "25 s", restSec: 60, tier: 0 },
+    { name: "Core anti-rotación en polea", sets: 3, reps: "10 por lado", restSec: 45, loadFactor: 0.12, tier: 2 },
   ],
   running: [
-    { name: "Zancadas caminando", sets: 4, reps: "10 por pierna", restSec: 80, loadFactor: 0.2 },
-    { name: "Elevación de gemelo a una pierna", sets: 4, reps: "15", restSec: 60 },
-    { name: "Puente de isquios a una pierna", sets: 3, reps: "12", restSec: 60 },
+    { name: "Zancadas caminando", sets: 4, reps: "10 por pierna", restSec: 80, loadFactor: 0.2, tier: 0 },
+    { name: "Elevación de gemelo a una pierna", sets: 4, reps: "15", restSec: 60, tier: 0 },
+    { name: "Puente de isquios a una pierna", sets: 3, reps: "12", restSec: 60, tier: 0 },
   ],
   natacion: [
-    { name: "Pull-over en polea", sets: 4, reps: "12", restSec: 70, loadFactor: 0.3 },
-    { name: "Dominadas asistidas", sets: 4, reps: "8", restSec: 90 },
-    { name: "Hollow hold", sets: 3, reps: "30 s", restSec: 45 },
+    { name: "Pull-over en polea", sets: 4, reps: "12", restSec: 70, loadFactor: 0.3, tier: 2 },
+    { name: "Dominadas asistidas", sets: 4, reps: "8", restSec: 90, tier: 1 },
+    { name: "Hollow hold", sets: 3, reps: "30 s", restSec: 45, tier: 0 },
   ],
   ciclismo: [
-    { name: "Sentadilla frontal", sets: 4, reps: "8", restSec: 110, loadFactor: 0.75 },
-    { name: "Step-up al cajón", sets: 4, reps: "10 por pierna", restSec: 80, loadFactor: 0.25 },
-    { name: "Plancha lateral", sets: 3, reps: "40 s", restSec: 45 },
+    { name: "Sentadilla frontal", sets: 4, reps: "8", restSec: 110, loadFactor: 0.75, tier: 1 },
+    { name: "Step-up al cajón", sets: 4, reps: "10 por pierna", restSec: 80, loadFactor: 0.25, tier: 0 },
+    { name: "Plancha lateral", sets: 3, reps: "40 s", restSec: 45, tier: 0 },
   ],
   boxeo: [
-    { name: "Press de banca explosivo", sets: 5, reps: "3", restSec: 120, loadFactor: 0.55 },
-    { name: "Lanzamiento de balón al suelo", sets: 5, reps: "8", restSec: 70 },
-    { name: "Cuello y trapecio con banda", sets: 3, reps: "15", restSec: 45 },
+    { name: "Press de banca explosivo", sets: 5, reps: "3", restSec: 120, loadFactor: 0.55, tier: 1 },
+    { name: "Lanzamiento de balón al suelo", sets: 5, reps: "8", restSec: 70, tier: 1 },
+    { name: "Cuello y trapecio con banda", sets: 3, reps: "15", restSec: 45, tier: 0 },
   ],
 };
 
-function cardioFor(goal: GoalId): Session {
+function cardioFor(goal: GoalId, gym: GymId, week: number): Session {
   if (goal === "bajar_peso" || goal === "recomposicion")
     return {
       day: "",
@@ -312,7 +440,7 @@ function cardioFor(goal: GoalId): Session {
       method: "hiit",
       focus: "Quema y capacidad",
       minutes: 26,
-      exercises: HIIT,
+      exercises: pick(HIIT, gym, 3, week),
     };
   if (goal === "resistencia")
     return {
@@ -321,7 +449,7 @@ function cardioFor(goal: GoalId): Session {
       method: "cardio_intervalos",
       focus: "Motor aeróbico",
       minutes: 38,
-      exercises: INTERVALOS,
+      exercises: pick(INTERVALOS, gym, 2, week),
     };
   return {
     day: "",
@@ -329,7 +457,7 @@ function cardioFor(goal: GoalId): Session {
     method: "liss",
     focus: "Recuperación activa",
     minutes: 35,
-    exercises: [{ name: "Caminata inclinada", sets: 1, reps: "35 min", restSec: 0 }],
+    exercises: [{ name: "Caminata inclinada", sets: 1, reps: "35 min", restSec: 0, tier: 0 }],
   };
 }
 
@@ -339,6 +467,7 @@ function hypertrophyMethod(level: LevelId, goal: GoalId): MethodId {
   if (level === "avanzado") return goal === "masa_muscular" ? "fst7" : "rest_pause";
   return "fst7";
 }
+
 
 export type Profile = {
   name: string;
