@@ -1,4 +1,7 @@
+import { bodyBias } from "./body";
+
 export type GoalId =
+
   | "bajar_peso"
   | "masa_muscular"
   | "mantener"
@@ -479,29 +482,36 @@ export type Profile = {
   reminderTime: string;
   reminderDays: number[];
   /** gym equipment available */
-  gym?: GymId;
-  sex?: "hombre" | "mujer";
-  age?: number;
-  height?: number;
-  neck?: number;
-  waist?: number;
-  hip?: number;
-  known?: {
-    bodyFat?: number;
-    water?: number;
-    muscleMass?: number;
-    visceral?: number;
-    bmi?: number;
-  };
+  gym?: GymId | undefined;
+  sex?: "hombre" | "mujer" | undefined;
+  age?: number | undefined;
+  height?: number | undefined;
+  neck?: number | undefined;
+  waist?: number | undefined;
+  hip?: number | undefined;
+  known?:
+    | {
+        bodyFat?: number | undefined;
+        water?: number | undefined;
+        muscleMass?: number | undefined;
+        visceral?: number | undefined;
+        bmi?: number | undefined;
+      }
+    | undefined;
 };
 
 
 /** Builds the weekly plan from the profile. Week 4, 8, 12... become deload weeks. */
 export function buildPlan(profile: Profile, week = 1): Session[] {
   const { goal, level, sport, daysPerWeek } = profile;
+  const gym: GymId = profile.gym ?? "completo";
+  const bias = bodyBias(profile);
   const isDeload = week > 0 && week % 4 === 0;
   const method = hypertrophyMethod(level, goal);
   const sessions: Session[] = [];
+
+  const accCount = bias.heavyFocus ? 2 : 3;
+  const anchorCount = bias.heavyFocus ? 3 : 2;
 
   const strength: Session[] =
     daysPerWeek <= 3
@@ -512,7 +522,10 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
             method: level === "iniciando" ? "piramidal" : method,
             focus: "Patrones básicos",
             minutes: 50,
-            exercises: FULLBODY.concat(PUSH.slice(0, 2)),
+            exercises: [
+              ...pick(FULLBODY.anchors, gym, 3, week),
+              ...pick(FULLBODY.acc, gym, 2, week),
+            ],
           },
           {
             day: "",
@@ -520,7 +533,11 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
             method: "piramidal_inverso",
             focus: "Tirón y pierna",
             minutes: 52,
-            exercises: PULL.slice(0, 3).concat(LEGS.slice(0, 2)),
+            exercises: [
+              ...pick(PULL.anchors, gym, 2, week, 3),
+              ...pick(LEGS.anchors, gym, 1, week, 5),
+              ...pick(LEGS.acc, gym, 2, week, 2),
+            ],
           },
         ]
       : [
@@ -530,7 +547,10 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
             method,
             focus: "Empuje",
             minutes: 55,
-            exercises: PUSH,
+            exercises: [
+              ...pick(PUSH.anchors, gym, anchorCount, week),
+              ...pick(PUSH.acc, gym, accCount, week),
+            ],
           },
           {
             day: "",
@@ -538,7 +558,10 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
             method: level === "avanzado" ? "cluster" : "piramidal",
             focus: "Tirón",
             minutes: 58,
-            exercises: PULL,
+            exercises: [
+              ...pick(PULL.anchors, gym, anchorCount, week, 1),
+              ...pick(PULL.acc, gym, accCount, week, 1),
+            ],
           },
           {
             day: "",
@@ -546,30 +569,47 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
             method: goal === "fuerza" ? "piramidal" : "gvt",
             focus: "Cuádriceps e isquios",
             minutes: 62,
-            exercises: LEGS,
+            exercises: [
+              ...pick(LEGS.anchors, gym, anchorCount, week, 2),
+              ...pick(LEGS.acc, gym, accCount, week, 2),
+            ],
           },
           {
             day: "",
             title: "HOMBRO · CORE",
             method: level === "avanzado" ? "dropset" : "prefatiga",
-            focus: "Deltoides",
+            focus: "Deltoides y core",
             minutes: 45,
-            exercises: SHOULDERS,
+            exercises: [
+              ...pick(SHOULDERS.anchors, gym, 1, week, 1),
+              ...pick(SHOULDERS.acc, gym, 4, week, 1),
+            ],
           },
         ];
 
   const strengthCount = Math.max(2, Math.min(strength.length, daysPerWeek - 1));
   sessions.push(...strength.slice(0, strengthCount));
-  sessions.push(cardioFor(goal));
+  sessions.push(cardioFor(goal, gym, week));
+
+  if (bias.extraMetabolic && goal !== "bajar_peso" && goal !== "recomposicion") {
+    sessions.push({
+      day: "",
+      title: "BLOQUE METABÓLICO",
+      method: "hiit",
+      focus: "Grasa y condición",
+      minutes: 24,
+      exercises: pick(bias.lowImpact ? LOW_IMPACT : HIIT, gym, 3, week, 2),
+    });
+  }
 
   if (daysPerWeek >= 5 || goal === "movilidad") {
     sessions.push({
       day: "",
-      title: "PLIOMETRÍA",
+      title: bias.lowImpact ? "POTENCIA BAJO IMPACTO" : "PLIOMETRÍA",
       method: "pliometria",
       focus: "Potencia y movilidad",
       minutes: 40,
-      exercises: PLIO,
+      exercises: pick(bias.lowImpact ? LOW_IMPACT : PLIO, gym, 4, week),
     });
   }
 
@@ -580,7 +620,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
       method: "sport",
       focus: "Transferencia deportiva",
       minutes: 45,
-      exercises: SPORT_WORK[sport],
+      exercises: availableIn(SPORT_WORK[sport], gym),
     });
   }
 
@@ -593,6 +633,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
     minutes: isDeload ? Math.round(s.minutes * 0.7) : s.minutes,
   }));
 }
+
 
 export function deloadFactor(week: number) {
   return week > 0 && week % 4 === 0 ? 0.6 : 1;

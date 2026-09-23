@@ -21,6 +21,8 @@ import {
 } from "@/lib/training";
 import { Onboarding } from "@/components/onboarding";
 import { nextReminderLabel, startReminderWatcher } from "@/lib/reminders";
+import { readoutFor } from "@/lib/body";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -83,6 +85,8 @@ function Index() {
   });
   const best = bestSetFor(log.sets, mainLift.name);
   const totalSets = session.exercises.reduce((n, e) => n + e.sets, 0);
+  const readout = readoutFor(profile);
+
 
   return (
     <Screen>
@@ -216,8 +220,41 @@ function Index() {
         </div>
       </section>
 
+      <section className="mt-6 px-5 rise" style={{ animationDelay: "270ms" }}>
+        <Label className="mb-2">Tu cuerpo hoy</Label>
+        <Card>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px] tracking-[0.15em]">Grasa</Label>
+              <div className="mt-0.5 font-display text-[18px] tracking-tight text-flame">
+                {readout.bodyFat !== null ? `${readout.bodyFat}%` : "—"}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px] tracking-[0.15em]">IMC</Label>
+              <div className="mt-0.5 font-display text-[18px] tracking-tight">
+                {readout.bmi ?? "—"}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px] tracking-[0.15em]">Calorías</Label>
+              <div className="mt-0.5 font-display text-[18px] tracking-tight">
+                {readout.calories ?? "—"}
+              </div>
+            </div>
+          </div>
+          {readout.notes[0] && (
+            <p className="mt-3 text-[12px] leading-relaxed text-mute">{readout.notes[0]}</p>
+          )}
+          <Link to="/perfil" className="mt-3 block font-mono text-[10px] uppercase tracking-[0.15em] text-flame">
+            Ver y editar mis medidas
+          </Link>
+        </Card>
+      </section>
+
       <section className="mt-6 px-5 pb-10 rise" style={{ animationDelay: "300ms" }}>
         <Label className="mb-2">Tu objetivo</Label>
+
         <Card>
           <div className="flex items-end justify-between">
             <div>

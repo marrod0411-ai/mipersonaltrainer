@@ -2,13 +2,47 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
 import { useProfile } from "@/lib/store";
-import { GOALS, LEVELS, SPORTS } from "@/lib/training";
-import type { GoalId, LevelId, SportId } from "@/lib/training";
+import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
+import type { GoalId, GymId, LevelId, SportId } from "@/lib/training";
+import { readoutFor } from "@/lib/body";
+import type { SexId } from "@/lib/body";
 import {
   notificationPermission,
   nextReminderLabel,
   requestNotifications,
 } from "@/lib/reminders";
+
+function NumberField({
+  label,
+  value,
+  onChange,
+  suffix,
+  placeholder,
+}: {
+  label: string;
+  value: number | undefined;
+  onChange: (n: number | undefined) => void;
+  suffix?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex-1">
+      <Label className="text-[9px]">{label}</Label>
+      <div className="mt-1 flex items-center rounded-2xl bg-bg/60 px-3 py-2">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value ?? ""}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+          className="w-full bg-transparent font-display text-[20px] tracking-tight text-ink outline-none placeholder:text-mute/50"
+        />
+        {suffix && <span className="ml-1 font-mono text-[10px] text-mute">{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
@@ -47,6 +81,8 @@ function ProfileScreen() {
     );
 
   const patch = (p: Partial<typeof profile>) => save({ ...profile, ...p });
+  const readout = readoutFor(profile);
+
 
   return (
     <Screen>
@@ -111,6 +147,165 @@ function ProfileScreen() {
             ))}
           </div>
         </div>
+
+
+        <div>
+          <Label className="mb-2">Dónde entrenas</Label>
+          <div className="flex flex-wrap gap-2">
+            {GYMS.map((g) => (
+              <Chip
+                key={g.id}
+                active={(profile.gym ?? "completo") === g.id}
+                onClick={() => patch({ gym: g.id as GymId })}
+                className="rounded-full px-3 py-1.5 font-display text-[12px] tracking-[0.08em]"
+              >
+                {g.label.toUpperCase()}
+              </Chip>
+            ))}
+          </div>
+        </div>
+
+        <Card>
+          <Label>Mis medidas</Label>
+          <div className="mt-2 flex gap-2">
+            {(["hombre", "mujer"] as SexId[]).map((s) => (
+              <Chip
+                key={s}
+                active={(profile.sex ?? "hombre") === s}
+                onClick={() => patch({ sex: s })}
+                className="flex-1 text-center font-display text-[14px]"
+              >
+                {s.toUpperCase()}
+              </Chip>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <NumberField
+              label="Estatura"
+              value={profile.height}
+              onChange={(v) => patch({ height: v })}
+              suffix="CM"
+              placeholder="175"
+            />
+            <NumberField
+              label="Edad"
+              value={profile.age}
+              onChange={(v) => patch({ age: v })}
+              suffix="AÑOS"
+              placeholder="30"
+            />
+          </div>
+          <div className="mt-3 flex gap-2">
+            <NumberField
+              label="Cuello"
+              value={profile.neck}
+              onChange={(v) => patch({ neck: v })}
+              suffix="CM"
+              placeholder="38"
+            />
+            <NumberField
+              label="Cintura"
+              value={profile.waist}
+              onChange={(v) => patch({ waist: v })}
+              suffix="CM"
+              placeholder="84"
+            />
+          </div>
+          {profile.sex === "mujer" && (
+            <div className="mt-3 flex gap-2">
+              <NumberField
+                label="Cadera"
+                value={profile.hip}
+                onChange={(v) => patch({ hip: v })}
+                suffix="CM"
+                placeholder="98"
+              />
+            </div>
+          )}
+          <Label className="mt-5">Datos que ya tengas medidos</Label>
+          <div className="mt-2 flex gap-2">
+            <NumberField
+              label="Grasa"
+              value={profile.known?.bodyFat}
+              onChange={(v) => patch({ known: { ...profile.known, bodyFat: v } })}
+              suffix="%"
+              placeholder="18"
+            />
+            <NumberField
+              label="Agua"
+              value={profile.known?.water}
+              onChange={(v) => patch({ known: { ...profile.known, water: v } })}
+              suffix="%"
+              placeholder="58"
+            />
+          </div>
+          <div className="mt-3 flex gap-2">
+            <NumberField
+              label="Masa muscular"
+              value={profile.known?.muscleMass}
+              onChange={(v) => patch({ known: { ...profile.known, muscleMass: v } })}
+              suffix="KG"
+              placeholder="34"
+            />
+            <NumberField
+              label="Grasa visceral"
+              value={profile.known?.visceral}
+              onChange={(v) => patch({ known: { ...profile.known, visceral: v } })}
+              placeholder="6"
+            />
+          </div>
+        </Card>
+
+        <Card>
+          <Label>Mi análisis</Label>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px]">Grasa</Label>
+              <div className="font-display text-[22px] tracking-tight text-flame">
+                {readout.bodyFat !== null ? `${readout.bodyFat}%` : "—"}
+              </div>
+              <div className="font-mono text-[9px] uppercase text-mute">
+                {readout.bodyFatLabel}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px]">IMC</Label>
+              <div className="font-display text-[22px] tracking-tight">{readout.bmi ?? "—"}</div>
+              <div className="font-mono text-[9px] uppercase text-mute">{readout.bmiLabel}</div>
+            </div>
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px]">Calorías</Label>
+              <div className="font-display text-[22px] tracking-tight">
+                {readout.calories ?? "—"}
+              </div>
+              <div className="font-mono text-[9px] uppercase text-mute">
+                {readout.tdee ? `Gasto ${readout.tdee}` : "Faltan datos"}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-bg/60 px-3 py-2">
+              <Label className="text-[9px]">Masa magra</Label>
+              <div className="font-display text-[22px] tracking-tight">
+                {readout.leanMass ? `${readout.leanMass} kg` : "—"}
+              </div>
+              <div className="font-mono text-[9px] uppercase text-mute">
+                Agua {Math.round(readout.waterTargetMl / 100) / 10} L
+              </div>
+            </div>
+          </div>
+          {readout.protein && (
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.13em] text-mute">
+              Proteína {readout.protein} g · grasa {readout.fat} g · carbos {readout.carbs} g
+            </div>
+          )}
+          <ul className="mt-3 space-y-1.5">
+            {readout.notes.map((n) => (
+              <li key={n} className="text-[12px] leading-relaxed text-mute">
+                · {n}
+              </li>
+            ))}
+          </ul>
+        </Card>
+
 
         <Card>
           <Label>Peso corporal</Label>
