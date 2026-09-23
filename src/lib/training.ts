@@ -482,20 +482,22 @@ export type Profile = {
   reminderTime: string;
   reminderDays: number[];
   /** gym equipment available */
-  gym?: GymId;
-  sex?: "hombre" | "mujer";
-  age?: number;
-  height?: number;
-  neck?: number;
-  waist?: number;
-  hip?: number;
-  known?: {
-    bodyFat?: number;
-    water?: number;
-    muscleMass?: number;
-    visceral?: number;
-    bmi?: number;
-  };
+  gym?: GymId | undefined;
+  sex?: "hombre" | "mujer" | undefined;
+  age?: number | undefined;
+  height?: number | undefined;
+  neck?: number | undefined;
+  waist?: number | undefined;
+  hip?: number | undefined;
+  known?:
+    | {
+        bodyFat?: number | undefined;
+        water?: number | undefined;
+        muscleMass?: number | undefined;
+        visceral?: number | undefined;
+        bmi?: number | undefined;
+      }
+    | undefined;
 };
 
 

@@ -3,21 +3,21 @@ import type { GoalId, LevelId, Profile } from "./training";
 export type SexId = "hombre" | "mujer";
 
 export type BodyInput = {
-  sex?: SexId;
-  age?: number;
-  height?: number; // cm
-  neck?: number; // cm
-  waist?: number; // cm
-  hip?: number; // cm (mujer)
+  sex?: SexId | undefined;
+  age?: number | undefined;
+  height?: number | undefined; // cm
+  neck?: number | undefined; // cm
+  waist?: number | undefined; // cm
+  hip?: number | undefined; // cm (mujer)
   bodyWeight: number; // kg
 };
 
 export type KnownMetrics = {
-  bodyFat?: number; // %
-  water?: number; // %
-  muscleMass?: number; // kg o %
-  visceral?: number;
-  bmi?: number;
+  bodyFat?: number | undefined; // %
+  water?: number | undefined; // %
+  muscleMass?: number | undefined; // kg o %
+  visceral?: number | undefined;
+  bmi?: number | undefined;
 };
 
 export type BodyReadout = {
