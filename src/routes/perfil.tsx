@@ -2,13 +2,47 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
 import { useProfile } from "@/lib/store";
-import { GOALS, LEVELS, SPORTS } from "@/lib/training";
-import type { GoalId, LevelId, SportId } from "@/lib/training";
+import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
+import type { GoalId, GymId, LevelId, SportId } from "@/lib/training";
+import { readoutFor } from "@/lib/body";
+import type { SexId } from "@/lib/body";
 import {
   notificationPermission,
   nextReminderLabel,
   requestNotifications,
 } from "@/lib/reminders";
+
+function NumberField({
+  label,
+  value,
+  onChange,
+  suffix,
+  placeholder,
+}: {
+  label: string;
+  value: number | undefined;
+  onChange: (n: number | undefined) => void;
+  suffix?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex-1">
+      <Label className="text-[9px]">{label}</Label>
+      <div className="mt-1 flex items-center rounded-2xl bg-bg/60 px-3 py-2">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value ?? ""}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+          className="w-full bg-transparent font-display text-[20px] tracking-tight text-ink outline-none placeholder:text-mute/50"
+        />
+        {suffix && <span className="ml-1 font-mono text-[10px] text-mute">{suffix}</span>}
+      </div>
+    </div>
+  );
+}
+
 
 export const Route = createFileRoute("/perfil")({
   head: () => ({
