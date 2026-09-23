@@ -1,10 +1,44 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
-import { GOALS, LEVELS, SPORTS } from "@/lib/training";
-import type { GoalId, LevelId, Profile, SportId } from "@/lib/training";
+import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
+import type { GoalId, GymId, LevelId, Profile, SportId } from "@/lib/training";
+import { analyzeBody } from "@/lib/body";
+import type { SexId } from "@/lib/body";
 import { requestNotifications } from "@/lib/reminders";
 
 const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
+const STEPS = 7;
+
+function NumberField({
+  label,
+  value,
+  onChange,
+  suffix,
+  placeholder,
+}: {
+  label: string;
+  value: number | undefined;
+  onChange: (n: number | undefined) => void;
+  suffix?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex-1">
+      <Label className="text-[9px]">{label}</Label>
+      <div className="mt-1 flex items-center rounded-2xl bg-bg/60 px-3 py-2">
+        <input
+          type="number"
+          inputMode="decimal"
+          value={value ?? ""}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+          className="w-full bg-transparent font-display text-[22px] tracking-tight text-ink outline-none placeholder:text-mute/50"
+        />
+        {suffix && <span className="ml-1 font-mono text-[10px] text-mute">{suffix}</span>}
+      </div>
+    </div>
+  );
+}
 
 export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [step, setStep] = useState(0);
@@ -12,10 +46,38 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [goal, setGoal] = useState<GoalId>("masa_muscular");
   const [level, setLevel] = useState<LevelId>("intermedio");
   const [sport, setSport] = useState<SportId>("ninguno");
+  const [gym, setGym] = useState<GymId>("completo");
   const [bodyWeight, setBodyWeight] = useState(75);
   const [daysPerWeek, setDaysPerWeek] = useState(4);
   const [reminderTime, setReminderTime] = useState("18:30");
   const [reminderDays, setReminderDays] = useState<number[]>([1, 2, 4, 5]);
+
+  const [sex, setSex] = useState<SexId>("hombre");
+  const [age, setAge] = useState<number | undefined>(undefined);
+  const [height, setHeight] = useState<number | undefined>(undefined);
+  const [neck, setNeck] = useState<number | undefined>(undefined);
+  const [waist, setWaist] = useState<number | undefined>(undefined);
+  const [hip, setHip] = useState<number | undefined>(undefined);
+
+  const [bodyFat, setBodyFat] = useState<number | undefined>(undefined);
+  const [water, setWater] = useState<number | undefined>(undefined);
+  const [muscleMass, setMuscleMass] = useState<number | undefined>(undefined);
+  const [visceral, setVisceral] = useState<number | undefined>(undefined);
+
+  const known = { bodyFat, water, muscleMass, visceral };
+
+  const readout = useMemo(
+    () =>
+      analyzeBody(
+        { sex, age, height, neck, waist, hip, bodyWeight },
+        known,
+        goal,
+        level,
+        daysPerWeek,
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sex, age, height, neck, waist, hip, bodyWeight, bodyFat, water, muscleMass, visceral, goal, level, daysPerWeek],
+  );
 
   const toggleDay = (d: number) =>
     setReminderDays((prev) =>
@@ -29,10 +91,18 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       goal,
       level,
       sport,
+      gym,
       bodyWeight,
       daysPerWeek,
       reminderTime,
       reminderDays,
+      sex,
+      age,
+      height,
+      neck,
+      waist,
+      hip,
+      known: { bodyFat, water, muscleMass, visceral },
     });
   };
 
@@ -41,7 +111,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       <header className="flex items-center justify-between px-5 pb-6 pt-8 rise">
         <div>
           <div className="font-display text-[11px] tracking-[0.25em] text-flame">
-            PASO {step + 1} DE 4
+            PASO {step + 1} DE {STEPS}
           </div>
           <h1 className="font-display text-[30px] leading-none tracking-tight text-balance">
             COACH DE HIERRO
@@ -49,7 +119,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
         </div>
         <div className="flex items-end gap-1.5">
           {[0, 1, 2, 3].map((i) => (
-            <Plate key={i} size={i === step ? 30 : 20} active={i <= step} />
+            <Plate key={i} size={i === Math.round((step / (STEPS - 1)) * 3) ? 30 : 20} active={i <= (step / (STEPS - 1)) * 3} />
           ))}
         </div>
       </header>
@@ -86,6 +156,86 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
         )}
 
         {step === 1 && (
+          <Card className="rise">
+            <Label className="mb-2">Sexo</Label>
+            <div className="flex gap-2">
+              {(["hombre", "mujer"] as SexId[]).map((s) => (
+                <Chip
+                  key={s}
+                  active={sex === s}
+                  onClick={() => setSex(s)}
+                  className="flex-1 text-center font-display text-[15px]"
+                >
+                  {s.toUpperCase()}
+                </Chip>
+              ))}
+            </div>
+            <div className="mt-4 flex gap-2">
+              <NumberField label="Estatura" value={height} onChange={setHeight} suffix="CM" placeholder="175" />
+              <NumberField label="Edad" value={age} onChange={setAge} suffix="AÑOS" placeholder="30" />
+            </div>
+            <div className="mt-3 flex gap-2">
+              <NumberField label="Cuello" value={neck} onChange={setNeck} suffix="CM" placeholder="38" />
+              <NumberField label="Cintura" value={waist} onChange={setWaist} suffix="CM" placeholder="84" />
+            </div>
+            {sex === "mujer" && (
+              <div className="mt-3 flex gap-2">
+                <NumberField label="Cadera" value={hip} onChange={setHip} suffix="CM" placeholder="98" />
+              </div>
+            )}
+            <p className="mt-3 font-mono text-[10px] uppercase leading-relaxed tracking-[0.13em] text-mute">
+              Mide el cuello bajo la nuez y la cintura en el ombligo, relajado.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl bg-bg/60 px-3 py-2">
+                <Label className="text-[9px]">Grasa estimada</Label>
+                <div className="font-display text-[22px] tracking-tight text-flame">
+                  {readout.bodyFat !== null ? `${readout.bodyFat}%` : "—"}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-bg/60 px-3 py-2">
+                <Label className="text-[9px]">IMC</Label>
+                <div className="font-display text-[22px] tracking-tight">
+                  {readout.bmi ?? "—"}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {step === 2 && (
+          <Card className="rise">
+            <Label>¿Ya tienes tus datos medidos?</Label>
+            <p className="mt-1 font-mono text-[10px] uppercase leading-relaxed tracking-[0.13em] text-mute">
+              Opcional. Si tienes báscula de bioimpedancia o un estudio, ponlos y los uso con
+              prioridad.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <NumberField label="Grasa" value={bodyFat} onChange={setBodyFat} suffix="%" placeholder="18" />
+              <NumberField label="Agua" value={water} onChange={setWater} suffix="%" placeholder="58" />
+            </div>
+            <div className="mt-3 flex gap-2">
+              <NumberField label="Masa muscular" value={muscleMass} onChange={setMuscleMass} suffix="KG" placeholder="34" />
+              <NumberField label="Grasa visceral" value={visceral} onChange={setVisceral} placeholder="6" />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl bg-bg/60 px-3 py-2">
+                <Label className="text-[9px]">Calorías objetivo</Label>
+                <div className="font-display text-[22px] tracking-tight text-flame">
+                  {readout.calories ?? "—"}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-bg/60 px-3 py-2">
+                <Label className="text-[9px]">Proteína</Label>
+                <div className="font-display text-[22px] tracking-tight">
+                  {readout.protein ? `${readout.protein} g` : "—"}
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {step === 3 && (
           <div className="rise">
             <Label className="mb-2">Tu objetivo principal</Label>
             <div className="grid grid-cols-2 gap-2">
@@ -103,7 +253,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 4 && (
           <div className="rise">
             <Label className="mb-2">Tu nivel de entrenamiento</Label>
             <div className="flex flex-col gap-2">
@@ -153,7 +303,31 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 5 && (
+          <div className="rise">
+            <Label className="mb-2">¿Dónde entrenas?</Label>
+            <div className="flex flex-col gap-2">
+              {GYMS.map((g) => (
+                <Chip
+                  key={g.id}
+                  active={gym === g.id}
+                  onClick={() => setGym(g.id)}
+                  className="px-4 py-3"
+                >
+                  <div className="font-display text-[18px] tracking-tight">
+                    {g.label.toUpperCase()}
+                  </div>
+                  <div className="font-mono text-[10px] opacity-70">{g.blurb}</div>
+                </Chip>
+              ))}
+            </div>
+            <p className="mt-3 font-mono text-[10px] uppercase leading-relaxed tracking-[0.13em] text-mute">
+              Según esto elijo máquinas, poleas y agarres que sí tengas disponibles.
+            </p>
+          </div>
+        )}
+
+        {step === 6 && (
           <Card className="rise">
             <Label>Recordatorio de entrenamiento</Label>
             <input
@@ -189,8 +363,8 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
             ATRÁS
           </Chip>
         )}
-        <FlameButton onClick={() => (step === 3 ? finish() : setStep(step + 1))}>
-          {step === 3 ? "CREAR MI PLAN" : "SIGUIENTE"}
+        <FlameButton onClick={() => (step === STEPS - 1 ? finish() : setStep(step + 1))}>
+          {step === STEPS - 1 ? "CREAR MI PLAN" : "SIGUIENTE"}
         </FlameButton>
       </div>
     </Screen>
