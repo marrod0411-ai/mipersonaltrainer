@@ -1,4 +1,7 @@
+import { bodyBias } from "./body";
+
 export type GoalId =
+
   | "bajar_peso"
   | "masa_muscular"
   | "mantener"
