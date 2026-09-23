@@ -85,6 +85,8 @@ function Index() {
   });
   const best = bestSetFor(log.sets, mainLift.name);
   const totalSets = session.exercises.reduce((n, e) => n + e.sets, 0);
+  const readout = readoutFor(profile);
+
 
   return (
     <Screen>
