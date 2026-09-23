@@ -142,10 +142,10 @@ function ProfileScreen() {
               >
                 {s.label.toUpperCase()}
               </Chip>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
+
 
         <div>
           <Label className="mb-2">Dónde entrenas</Label>
