@@ -81,6 +81,8 @@ function ProfileScreen() {
     );
 
   const patch = (p: Partial<typeof profile>) => save({ ...profile, ...p });
+  const readout = readoutFor(profile);
+
 
   return (
     <Screen>
