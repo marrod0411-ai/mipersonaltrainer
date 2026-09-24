@@ -10,6 +10,8 @@ import {
   Screen,
   TabBar,
 } from "@/components/ui-kit";
+import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
+import { RestTimer } from "@/components/rest-timer";
 import { useLog, useProfile } from "@/lib/store";
 import { METHODS, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
 
@@ -41,6 +43,9 @@ function SessionScreen() {
   const [doneSets, setDoneSets] = useState<Record<string, number>>({});
   const [repsInput, setRepsInput] = useState(8);
   const [loadOverride, setLoadOverride] = useState<Record<string, number>>({});
+  const [showGuide, setShowGuide] = useState(false);
+  const [restKey, setRestKey] = useState(0);
+  const [resting, setResting] = useState(false);
 
   const plan = useMemo(() => (profile ? buildPlan(profile, log.week) : []), [profile, log.week]);
   const session = plan[Number(index)];
@@ -79,6 +84,8 @@ function SessionScreen() {
       reps: repsInput,
     });
     setDoneSets((p) => ({ ...p, [exercise.name]: Math.min(exercise.sets, done + 1) }));
+    setRestKey((k) => k + 1);
+    setResting(true);
   };
 
   const finish = () => {
