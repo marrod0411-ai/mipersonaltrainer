@@ -152,6 +152,13 @@ function SessionScreen() {
             {exercise.name.toUpperCase()} · SERIE {Math.min(done + 1, exercise.sets)}/
             {exercise.sets}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowGuide(true)}
+            className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
+          >
+            ▸ Ver técnica y video
+          </button>
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-2">
               {Array.from({ length: Math.min(exercise.sets, 7) }).map((_, i) => (
@@ -224,11 +231,28 @@ function SessionScreen() {
         </Card>
       </section>
 
+      {resting && (
+        <section className="mt-6 px-5 rise" style={{ animationDelay: "120ms" }}>
+          <RestTimer
+            key={restKey}
+            seconds={exercise.restSec}
+            onDone={() => setResting(false)}
+          />
+        </section>
+      )}
+
       <section className="mt-6 px-5 pb-10 rise" style={{ animationDelay: "240ms" }}>
         <FlameButton onClick={finish}>TERMINAR SESIÓN</FlameButton>
       </section>
 
       <TabBar />
+      {showGuide && (
+        <ExerciseGuideSheet
+          exercise={exercise}
+          kg={load}
+          onClose={() => setShowGuide(false)}
+        />
+      )}
     </Screen>
   );
 }
