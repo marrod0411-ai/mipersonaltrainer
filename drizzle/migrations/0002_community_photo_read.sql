@@ -1,0 +1,1 @@
+create policy "community read" on storage.objects for select to authenticated using (bucket_id = 'community');

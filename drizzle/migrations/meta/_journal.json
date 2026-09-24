@@ -15,6 +15,13 @@
       "when": 1790287710450,
       "tag": "0001_community",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790287723259,
+      "tag": "0002_community_photo_read",
+      "breakpoints": true
     }
   ]
 }
