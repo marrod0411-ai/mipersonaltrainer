@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProgresoRouteImport } from './routes/progreso'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SesionIndexRouteImport } from './routes/sesion.$index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +36,11 @@ const ProgresoRoute = ProgresoRouteImport.update({
   path: '/progreso',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SesionIndexRoute = SesionIndexRouteImport.update({
   id: '/sesion/$index',
   path: '/sesion/$index',
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesById {
@@ -61,14 +69,34 @@ export interface FileRoutesById {
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
+  fullPaths:
+    | '/'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
-  id: '__root__' | '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
+  to:
+    | '/'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
+  id:
+    | '__root__'
+    | '/'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +104,7 @@ export interface RootRouteChildren {
   PerfilRoute: typeof PerfilRoute
   PlanRoute: typeof PlanRoute
   ProgresoRoute: typeof ProgresoRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SesionIndexRoute: typeof SesionIndexRoute
 }
 
@@ -109,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgresoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sesion/$index': {
       id: '/sesion/$index'
       path: '/sesion/$index'
@@ -124,6 +160,7 @@ const rootRouteChildren: RootRouteChildren = {
   PerfilRoute: PerfilRoute,
   PlanRoute: PlanRoute,
   ProgresoRoute: ProgresoRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SesionIndexRoute: SesionIndexRoute,
 }
 export const routeTree = rootRouteImport
