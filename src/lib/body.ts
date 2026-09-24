@@ -1,3 +1,4 @@
+import { sportActivityOf } from "./sport-activity";
 import type { GoalId, LevelId, Profile } from "./training";
 
 export type SexId = "hombre" | "mujer";

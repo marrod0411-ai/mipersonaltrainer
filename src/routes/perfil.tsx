@@ -1,3 +1,5 @@
+import { SportActivityPanel } from "@/components/sport-activity-panel";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
