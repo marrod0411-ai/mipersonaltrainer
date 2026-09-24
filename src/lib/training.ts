@@ -1,4 +1,5 @@
 import { bodyBias } from "./body";
+import { cardioOption } from "./cardio";
 
 export type GoalId =
 
@@ -436,19 +437,13 @@ const SPORT_WORK: Record<Exclude<SportId, "ninguno">, Exercise[]> = {
 };
 
 const ALL_POOLS: Exercise[][] = [
-  ...Object.values(PUSH_POOLS_REF()),
+  ...[PUSH, PULL, LEGS, SHOULDERS, FULLBODY].flatMap((p) => Object.values(p) as Exercise[][]),
   HIIT,
   INTERVALOS,
   PLIO,
   LOW_IMPACT,
   ...Object.values(SPORT_WORK),
 ];
-
-function PUSH_POOLS_REF(): Record<string, Exercise[]> {
-  const out: Record<string, Exercise[]> = {};
-  for (const [k, v] of Object.entries(POOLS_FOR_ALTS)) out[k] = v;
-  return out;
-}
 
 /** Alternatives for an exercise when the machine is busy or out of service. */
 export function alternativesFor(ex: Exercise, gym: GymId, exclude: string[] = []): Exercise[] {
@@ -517,6 +512,7 @@ export type Profile = {
   sportActivity?:
     | { minutes: number; timesPerWeek: number; intensity: "baja" | "media" | "alta" }
     | undefined;
+  cardioPrefs?: string[] | undefined;
   bodyWeight: number;
   daysPerWeek: number;
   reminderTime: string;
@@ -630,7 +626,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
     strength = [push(0, 2), pull(0, 2), lower("PIERNA A", 0, 2), push(3, 2), pull(3, 2), lower("PIERNA B", 3, 2)];
   if (daysPerWeek === 3) strength = strength.slice(0, 2).map((s) => ({ ...s, focus: s.focus.replace(/≈\d+/, `≈${Math.round(weeklySets / 2)}`) }));
   sessions.push(...strength);
-  sessions.push(cardioFor(goal, gym, week));
+  sessions.push(cardioFor(goal, gym, week, profile.cardioPrefs));
 
   if (bias.extraMetabolic && goal !== "bajar_peso" && goal !== "recomposicion") {
     sessions.push({
