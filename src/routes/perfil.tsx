@@ -1,3 +1,5 @@
+import { SportActivityPanel } from "@/components/sport-activity-panel";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
@@ -147,6 +149,9 @@ function ProfileScreen() {
             ))}
           </div>
         </div>
+
+        <SportActivityPanel profile={profile} onChange={save} />
+
 
 
         <div>
@@ -380,6 +385,17 @@ function ProfileScreen() {
           className="w-full text-center font-display text-[14px] tracking-[0.1em]"
         >
           BORRAR MI PLAN Y EMPEZAR DE CERO
+        </Chip>
+
+        <Chip
+          onClick={() => {
+            window.localStorage.removeItem("pt.profile.v1");
+            window.localStorage.removeItem("pt.log.v1");
+            void supabase.auth.signOut();
+          }}
+          className="w-full text-center font-display text-[14px] tracking-[0.1em]"
+        >
+          CERRAR SESIÓN
         </Chip>
       </div>
 

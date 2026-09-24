@@ -1,3 +1,4 @@
+import { sportActivityOf } from "./sport-activity";
 import type { GoalId, LevelId, Profile } from "./training";
 
 export type SexId = "hombre" | "mujer";
@@ -134,6 +135,7 @@ export function analyzeBody(
   goal: GoalId,
   level: LevelId,
   daysPerWeek: number,
+  sportDaily = 0,
 ): BodyReadout {
   const weight = b.bodyWeight;
   const bmi = known?.bmi ?? bmiOf(weight, b.height);
@@ -150,7 +152,7 @@ export function analyzeBody(
     );
 
   const factor = ACTIVITY[Math.min(6, Math.max(3, daysPerWeek))] ?? 1.55;
-  const tdee = bmr ? Math.round(bmr * factor) : null;
+  const tdee = bmr ? Math.round(bmr * factor + sportDaily) : null;
   const calories = tdee ? Math.round((tdee * (1 + CAL_ADJUST[goal])) / 10) * 10 : null;
 
   let protein: number | null = null;
@@ -221,6 +223,7 @@ export function readoutFor(profile: Profile) {
     profile.goal,
     profile.level,
     profile.daysPerWeek,
+    sportActivityOf(profile)?.daily ?? 0,
   );
 }
 
