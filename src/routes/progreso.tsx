@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Card, Label, Plate, Screen, TabBar } from "@/components/ui-kit";
 import { useLog, useProfile } from "@/lib/store";
+import { ProgressDashboard } from "@/components/progress-dashboard";
 
 export const Route = createFileRoute("/progreso")({
   head: () => ({
@@ -52,24 +53,11 @@ function ProgressScreen() {
       </header>
 
       <section className="px-5 rise" style={{ animationDelay: "60ms" }}>
-        <Card>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-2xl bg-bg/60 px-3 py-2">
-              <Label className="text-[9px] tracking-[0.15em]">Sesiones</Label>
-              <div className="mt-0.5 font-display text-[20px]">{log.completedSessions.length}</div>
-            </div>
-            <div className="rounded-2xl bg-bg/60 px-3 py-2">
-              <Label className="text-[9px] tracking-[0.15em]">Series</Label>
-              <div className="mt-0.5 font-display text-[20px]">{log.sets.length}</div>
-            </div>
-            <div className="rounded-2xl bg-bg/60 px-3 py-2">
-              <Label className="text-[9px] tracking-[0.15em]">Volumen</Label>
-              <div className="mt-0.5 font-display text-[20px]">
-                {Math.round(totalVolume / 1000)}t
-              </div>
-            </div>
-          </div>
-        </Card>
+        {profile && <ProgressDashboard profile={profile} log={log} />}
+        <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-mute">
+          Total histórico · {log.completedSessions.length} sesiones · {log.sets.length} series ·{" "}
+          {Math.round(totalVolume / 1000)}t
+        </p>
       </section>
 
       {byExercise.length === 0 ? (

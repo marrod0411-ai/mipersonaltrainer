@@ -16,24 +16,51 @@ export type Database = {
     Tables: {
       awards: {
         Row: {
+          announcement: string
           created_at: string
           id: string
+          place: number
           quarter: string
           title: string
           user_id: string
         }
         Insert: {
+          announcement?: string
           created_at?: string
           id?: string
+          place?: number
           quarter: string
           title?: string
           user_id: string
         }
         Update: {
+          announcement?: string
           created_at?: string
           id?: string
+          place?: number
           quarter?: string
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      challenge_participants: {
+        Row: {
+          goal: string
+          joined_at: string
+          quarter: string
+          user_id: string
+        }
+        Insert: {
+          goal?: string
+          joined_at?: string
+          quarter: string
+          user_id?: string
+        }
+        Update: {
+          goal?: string
+          joined_at?: string
+          quarter?: string
           user_id?: string
         }
         Relationships: []
@@ -97,29 +124,35 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          hidden: boolean
           id: string
           kind: string
           photo_url: string | null
           plan_week: number | null
           user_id: string
+          visibility: string
         }
         Insert: {
           body?: string
           created_at?: string
+          hidden?: boolean
           id?: string
           kind?: string
           photo_url?: string | null
           plan_week?: number | null
           user_id?: string
+          visibility?: string
         }
         Update: {
           body?: string
           created_at?: string
+          hidden?: boolean
           id?: string
           kind?: string
           photo_url?: string | null
           plan_week?: number | null
           user_id?: string
+          visibility?: string
         }
         Relationships: []
       }
@@ -143,6 +176,54 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          comment_id: string | null
+          created_at: string
+          details: string
+          id: string
+          post_id: string | null
+          reason: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          post_id?: string | null
+          reason: string
+          reporter_id?: string
+          status?: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          post_id?: string | null
+          reason?: string
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_data: {
         Row: {
@@ -188,6 +269,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      challenge_leaderboard: {
+        Args: { _from: string; _quarter: string; _to: string }
+        Returns: {
+          comments: number
+          country: string
+          display_name: string
+          has_end: boolean
+          has_start: boolean
+          likes: number
+          posts: number
+          progress_photos: number
+          score: number
+          sessions: number
+          user_id: string
+        }[]
+      }
       community_leaderboard: {
         Args: { _from: string; _to: string }
         Returns: {

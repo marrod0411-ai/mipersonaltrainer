@@ -1,6 +1,7 @@
 import { CARDIO_OPTIONS } from "@/lib/cardio";
 import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
+import { MeasureGuide } from "@/components/measure-guide";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
 import type { GoalId, GymId, LevelId, Profile, SportId } from "@/lib/training";
 import { analyzeBody } from "@/lib/body";
@@ -186,9 +187,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
                 <NumberField label="Cadera" value={hip} onChange={setHip} suffix="CM" placeholder="98" />
               </div>
             )}
-            <p className="mt-3 font-mono text-[10px] uppercase leading-relaxed tracking-[0.13em] text-mute">
-              Mide el cuello bajo la nuez y la cintura en el ombligo, relajado.
-            </p>
+            <MeasureGuide sex={sex} />
             <div className="mt-4 grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-bg/60 px-3 py-2">
                 <Label className="text-[9px]">Grasa estimada</Label>

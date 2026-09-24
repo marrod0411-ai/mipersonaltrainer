@@ -11,6 +11,7 @@ import {
   TabBar,
 } from "@/components/ui-kit";
 import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
+import { ExerciseVideo } from "@/components/exercise-video";
 import { RestTimer } from "@/components/rest-timer";
 import { useLog, useProfile } from "@/lib/store";
 import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
@@ -158,12 +159,15 @@ function SessionScreen() {
             {exercise.name.toUpperCase()} · SERIE {Math.min(done + 1, exercise.sets)}/
             {exercise.sets}
           </div>
+          <div className="mt-3">
+            <ExerciseVideo key={exercise.name} name={exercise.name} />
+          </div>
           <button
             type="button"
             onClick={() => setShowGuide(true)}
-            className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
+            className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
           >
-            ▸ Ver técnica y video
+            ▸ Técnica paso a paso, errores comunes{profile.level !== "avanzado" ? " y video para principiantes" : ""}
           </button>
           <MachineStatus
             value={status[exercise.name] ?? "ok"}
