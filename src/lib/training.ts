@@ -477,6 +477,9 @@ export type Profile = {
   goal: GoalId;
   level: LevelId;
   sport: SportId;
+  sportActivity?:
+    | { minutes: number; timesPerWeek: number; intensity: "baja" | "media" | "alta" }
+    | undefined;
   bodyWeight: number;
   daysPerWeek: number;
   reminderTime: string;
