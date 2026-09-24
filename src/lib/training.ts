@@ -167,6 +167,15 @@ export type Session = {
 
 const DAYS = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
 
+export type StartFocusId = "auto" | "pierna" | "superior" | "empuje" | "tiraje";
+export const START_FOCUS: { id: StartFocusId; label: string; blurb: string; match?: RegExp }[] = [
+  { id: "auto", label: "Que decida el coach", blurb: "Orden recomendado" },
+  { id: "pierna", label: "Pierna", blurb: "Cuádriceps, glúteo, femoral", match: /PIERNA/ },
+  { id: "superior", label: "Tren superior", blurb: "Torso completo", match: /TORSO|PECHO/ },
+  { id: "empuje", label: "Pecho · hombro · tríceps", blurb: "Empuje", match: /PECHO|TORSO/ },
+  { id: "tiraje", label: "Espalda · bíceps", blurb: "Tiraje", match: /ESPALDA|TORSO/ },
+];
+
 const LEVEL_FACTOR: Record<LevelId, number> = {
   iniciando: 0.55,
   intermedio: 0.8,
@@ -513,6 +522,7 @@ export type Profile = {
     | { minutes: number; timesPerWeek: number; intensity: "baja" | "media" | "alta" }
     | undefined;
   cardioPrefs?: string[] | undefined;
+  startFocus?: StartFocusId | undefined;
   bodyWeight: number;
   daysPerWeek: number;
   reminderTime: string;
@@ -625,6 +635,9 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
   else
     strength = [push(0, 2), pull(0, 2), lower("PIERNA A", 0, 2), push(3, 2), pull(3, 2), lower("PIERNA B", 3, 2)];
   if (daysPerWeek === 3) strength = strength.slice(0, 2).map((s) => ({ ...s, focus: s.focus.replace(/≈\d+/, `≈${Math.round(weeklySets / 2)}`) }));
+  const re = START_FOCUS.find((f) => f.id === profile.startFocus)?.match;
+  const startAt = re ? strength.findIndex((s) => re.test(s.title)) : -1;
+  if (startAt > 0) strength = [...strength.slice(startAt), ...strength.slice(0, startAt)];
   sessions.push(...strength);
   sessions.push(cardioFor(goal, gym, week, profile.cardioPrefs));
 

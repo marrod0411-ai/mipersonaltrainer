@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
 import { MeasureGuide } from "@/components/measure-guide";
+import { StartFocusPicker } from "@/components/start-focus-picker";
 import { useProfile } from "@/lib/store";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
 import { CARDIO_OPTIONS } from "@/lib/cardio";
@@ -170,6 +171,16 @@ function ProfileScreen() {
               </Chip>
             ))}
           </div>
+        </div>
+
+        <div>
+          <Label className="mb-1">Empezar la semana con</Label>
+          <p className="mb-2 text-[12px] text-mute">El resto de la semana se ordena a partir de este día.</p>
+          <StartFocusPicker
+            value={profile.startFocus ?? "auto"}
+            onChange={(v) => patch({ startFocus: v })}
+            daysPerWeek={profile.daysPerWeek}
+          />
         </div>
 
         <div>

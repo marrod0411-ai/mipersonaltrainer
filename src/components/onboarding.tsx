@@ -2,8 +2,9 @@ import { CARDIO_OPTIONS } from "@/lib/cardio";
 import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
 import { MeasureGuide } from "@/components/measure-guide";
+import { StartFocusPicker } from "@/components/start-focus-picker";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
-import type { GoalId, GymId, LevelId, Profile, SportId } from "@/lib/training";
+import type { GoalId, GymId, LevelId, Profile, SportId, StartFocusId } from "@/lib/training";
 import { analyzeBody } from "@/lib/body";
 import type { SexId } from "@/lib/body";
 import { requestNotifications } from "@/lib/reminders";
@@ -48,6 +49,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [goal, setGoal] = useState<GoalId>("masa_muscular");
   const [level, setLevel] = useState<LevelId>("intermedio");
   const [sport, setSport] = useState<SportId>("ninguno");
+  const [startFocus, setStartFocus] = useState<StartFocusId>("auto");
   const [cardioPrefs, setCardioPrefs] = useState<string[]>([]);
   const [gym, setGym] = useState<GymId>("completo");
   const [bodyWeight, setBodyWeight] = useState(75);
@@ -95,6 +97,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       level,
       sport,
       cardioPrefs,
+      startFocus,
       gym,
       bodyWeight,
       daysPerWeek,
@@ -331,7 +334,12 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 6 && (
           <div className="rise">
-            <Label className="mb-1">¿Qué cardio te gusta más?</Label>
+            <Label className="mb-1">¿Con qué quieres empezar la semana?</Label>
+            <p className="mb-3 text-[12px] text-mute">
+              Tu primer día será esa parte del cuerpo y el resto de la semana se ordena a partir de ahí para que todo quede equilibrado.
+            </p>
+            <StartFocusPicker value={startFocus} onChange={setStartFocus} />
+            <Label className="mb-1 mt-6">¿Qué cardio te gusta más?</Label>
             <p className="mb-3 text-[12px] text-mute">Elige todos los que quieras. Los iré rotando cada semana.</p>
             <div className="grid grid-cols-2 gap-2">
               {CARDIO_OPTIONS.map((c) => (
