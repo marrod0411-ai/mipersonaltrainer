@@ -13,7 +13,8 @@ import {
 import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
 import { RestTimer } from "@/components/rest-timer";
 import { useLog, useProfile } from "@/lib/store";
-import { METHODS, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
+import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
+import type { Exercise } from "@/lib/training";
 
 export const Route = createFileRoute("/sesion/$index")({
   head: () => ({
@@ -46,9 +47,14 @@ function SessionScreen() {
   const [showGuide, setShowGuide] = useState(false);
   const [restKey, setRestKey] = useState(0);
   const [resting, setResting] = useState(false);
+  const [swaps, setSwaps] = useState<Record<number, Exercise>>({});
+  const [status, setStatus] = useState<Record<string, "ok" | "ocupada" | "fuera">>({});
 
   const plan = useMemo(() => (profile ? buildPlan(profile, log.week) : []), [profile, log.week]);
-  const session = plan[Number(index)];
+  const rawSession = plan[Number(index)];
+  const session = rawSession
+    ? { ...rawSession, exercises: rawSession.exercises.map((e, i) => swaps[i] ?? e) }
+    : undefined;
 
   if (!loaded) return <Screen />;
   if (!profile || !session)
@@ -159,6 +165,28 @@ function SessionScreen() {
           >
             ▸ Ver técnica y video
           </button>
+          <MachineStatus
+            value={status[exercise.name] ?? "ok"}
+            onChange={(v) => setStatus((p) => ({ ...p, [exercise.name]: v }))}
+            alternatives={alternativesFor(
+              exercise,
+              profile.gym ?? "completo",
+              session.exercises.map((e) => e.name),
+            )}
+            onSwap={(alt) => {
+              setSwaps((p) => ({ ...p, [exIndex]: alt }));
+              setRepsInput(parseInt(alt.reps, 10) || 10);
+            }}
+            onSkipAhead={() => {
+              const next = session.exercises.findIndex(
+                (e, i) => i !== exIndex && (doneSets[e.name] ?? 0) < e.sets,
+              );
+              if (next >= 0) {
+                setExIndex(next);
+                setRepsInput(parseInt(session.exercises[next]!.reps, 10) || 10);
+              }
+            }}
+          />
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-2">
               {Array.from({ length: Math.min(exercise.sets, 7) }).map((_, i) => (
@@ -250,9 +278,75 @@ function SessionScreen() {
         <ExerciseGuideSheet
           exercise={exercise}
           kg={load}
+          beginner={profile.level !== "avanzado"}
           onClose={() => setShowGuide(false)}
         />
       )}
     </Screen>
+  );
+}
+
+function MachineStatus({
+  value,
+  onChange,
+  alternatives,
+  onSwap,
+  onSkipAhead,
+}: {
+  value: "ok" | "ocupada" | "fuera";
+  onChange: (v: "ok" | "ocupada" | "fuera") => void;
+  alternatives: Exercise[];
+  onSwap: (e: Exercise) => void;
+  onSkipAhead: () => void;
+}) {
+  const opts = [
+    { id: "ok", label: "Disponible" },
+    { id: "ocupada", label: "Ocupada" },
+    { id: "fuera", label: "Fuera de servicio" },
+  ] as const;
+  return (
+    <div className="mt-3">
+      <Label className="mb-1.5 text-[9px]">Estado de la máquina</Label>
+      <div className="flex gap-1.5">
+        {opts.map((o) => (
+          <Chip
+            key={o.id}
+            active={value === o.id}
+            onClick={() => onChange(o.id)}
+            className="flex-1 px-2 py-1.5 text-center font-display text-[11px] tracking-[0.05em]"
+          >
+            {o.label.toUpperCase()}
+          </Chip>
+        ))}
+      </div>
+      {value !== "ok" && (
+        <div className="mt-2 rounded-2xl bg-bg/60 p-3">
+          <p className="text-[12px] leading-relaxed text-ink/90">
+            {value === "ocupada"
+              ? "Adelanta otro ejercicio y vuelve después, o cámbialo por una alternativa:"
+              : "Sin problema, cámbialo por una alternativa que trabaja el mismo músculo:"}
+          </p>
+          {value === "ocupada" && (
+            <button
+              type="button"
+              onClick={onSkipAhead}
+              className="mt-2 font-mono text-[10px] uppercase tracking-[0.15em] text-flame"
+            >
+              ▸ Hacer el siguiente ejercicio mientras tanto
+            </button>
+          )}
+          <div className="mt-2 flex flex-col gap-1.5">
+            {alternatives.length === 0 && (
+              <span className="text-[12px] text-mute">No hay alternativas para este ejercicio.</span>
+            )}
+            {alternatives.map((a) => (
+              <Chip key={a.name} onClick={() => { onSwap(a); onChange("ok"); }} className="px-3 py-2">
+                <span className="font-display text-[13px] tracking-tight">⇄ {a.name.toUpperCase()}</span>
+              </Chip>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

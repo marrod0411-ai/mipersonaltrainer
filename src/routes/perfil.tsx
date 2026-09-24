@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
 import { useProfile } from "@/lib/store";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
+import { CARDIO_OPTIONS } from "@/lib/cardio";
 import type { GoalId, GymId, LevelId, SportId } from "@/lib/training";
 import { readoutFor } from "@/lib/body";
 import type { SexId } from "@/lib/body";
@@ -167,6 +168,28 @@ function ProfileScreen() {
                 {g.label.toUpperCase()}
               </Chip>
             ))}
+          </div>
+        </div>
+
+        <div>
+          <Label className="mb-2">Mi cardio favorito</Label>
+          <div className="flex flex-wrap gap-2">
+            {CARDIO_OPTIONS.map((c) => {
+              const cur = profile.cardioPrefs ?? [];
+              const on = cur.includes(c.id);
+              return (
+                <Chip
+                  key={c.id}
+                  active={on}
+                  onClick={() =>
+                    patch({ cardioPrefs: on ? cur.filter((x) => x !== c.id) : [...cur, c.id] })
+                  }
+                  className="rounded-full px-3 py-1.5 font-display text-[12px] tracking-[0.08em]"
+                >
+                  {c.label.toUpperCase()}
+                </Chip>
+              );
+            })}
           </div>
         </div>
 

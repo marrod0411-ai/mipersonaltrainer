@@ -1,3 +1,4 @@
+import { CARDIO_OPTIONS } from "@/lib/cardio";
 import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
@@ -7,7 +8,7 @@ import type { SexId } from "@/lib/body";
 import { requestNotifications } from "@/lib/reminders";
 
 const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
-const STEPS = 7;
+const STEPS = 8;
 
 function NumberField({
   label,
@@ -46,6 +47,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [goal, setGoal] = useState<GoalId>("masa_muscular");
   const [level, setLevel] = useState<LevelId>("intermedio");
   const [sport, setSport] = useState<SportId>("ninguno");
+  const [cardioPrefs, setCardioPrefs] = useState<string[]>([]);
   const [gym, setGym] = useState<GymId>("completo");
   const [bodyWeight, setBodyWeight] = useState(75);
   const [daysPerWeek, setDaysPerWeek] = useState(4);
@@ -91,6 +93,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       goal,
       level,
       sport,
+      cardioPrefs,
       gym,
       bodyWeight,
       daysPerWeek,
@@ -328,6 +331,28 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
         )}
 
         {step === 6 && (
+          <div className="rise">
+            <Label className="mb-1">¿Qué cardio te gusta más?</Label>
+            <p className="mb-3 text-[12px] text-mute">Elige todos los que quieras. Los iré rotando cada semana.</p>
+            <div className="grid grid-cols-2 gap-2">
+              {CARDIO_OPTIONS.map((c) => (
+                <Chip
+                  key={c.id}
+                  active={cardioPrefs.includes(c.id)}
+                  onClick={() =>
+                    setCardioPrefs((p) => (p.includes(c.id) ? p.filter((x) => x !== c.id) : [...p, c.id]))
+                  }
+                  className="px-3 py-2.5"
+                >
+                  <div className="font-display text-[14px] leading-tight tracking-tight">{c.label.toUpperCase()}</div>
+                  <div className="font-mono text-[9px] opacity-70">{c.blurb}</div>
+                </Chip>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 7 && (
           <Card className="rise">
             <Label>Recordatorio de entrenamiento</Label>
             <input

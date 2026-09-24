@@ -10,14 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ComunidadRouteImport } from './routes/comunidad'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProgresoRouteImport } from './routes/progreso'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SesionIndexRouteImport } from './routes/sesion.$index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComunidadRoute = ComunidadRouteImport.update({
+  id: '/comunidad',
+  path: '/comunidad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -35,6 +42,11 @@ const ProgresoRoute = ProgresoRouteImport.update({
   path: '/progreso',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SesionIndexRoute = SesionIndexRouteImport.update({
   id: '/sesion/$index',
   path: '/sesion/$index',
@@ -43,39 +55,69 @@ const SesionIndexRoute = SesionIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/comunidad': typeof ComunidadRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/comunidad': typeof ComunidadRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/comunidad': typeof ComunidadRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
+  fullPaths:
+    | '/'
+    | '/comunidad'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
-  id: '__root__' | '/' | '/perfil' | '/plan' | '/progreso' | '/sesion/$index'
+  to:
+    | '/'
+    | '/comunidad'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
+  id:
+    | '__root__'
+    | '/'
+    | '/comunidad'
+    | '/perfil'
+    | '/plan'
+    | '/progreso'
+    | '/reset-password'
+    | '/sesion/$index'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComunidadRoute: typeof ComunidadRoute
   PerfilRoute: typeof PerfilRoute
   PlanRoute: typeof PlanRoute
   ProgresoRoute: typeof ProgresoRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SesionIndexRoute: typeof SesionIndexRoute
 }
 
@@ -86,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comunidad': {
+      id: '/comunidad'
+      path: '/comunidad'
+      fullPath: '/comunidad'
+      preLoaderRoute: typeof ComunidadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -109,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgresoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sesion/$index': {
       id: '/sesion/$index'
       path: '/sesion/$index'
@@ -121,9 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComunidadRoute: ComunidadRoute,
   PerfilRoute: PerfilRoute,
   PlanRoute: PlanRoute,
   ProgresoRoute: ProgresoRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SesionIndexRoute: SesionIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -2,9 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 export const findExerciseVideo = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ name: z.string().min(1).max(120) }).parse(d))
+  .inputValidator((d) => z.object({ name: z.string().min(1).max(120), kind: z.enum(["tecnica", "principiante"]).optional() }).parse(d))
   .handler(async ({ data }) => {
-    const q = encodeURIComponent(`${data.name} técnica correcta ejecución gym`);
+    const q = encodeURIComponent(
+      data.kind === "principiante"
+        ? `${data.name} cómo se hace explicación para principiantes máquina gimnasio`
+        : `${data.name} técnica correcta ejecución gym`,
+    );
     try {
       const res = await fetch(`https://www.youtube.com/results?search_query=${q}`, {
         headers: { "Accept-Language": "es-ES,es;q=0.9", "User-Agent": "Mozilla/5.0" },

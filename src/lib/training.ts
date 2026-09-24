@@ -1,4 +1,5 @@
 import { bodyBias } from "./body";
+import { cardioOption } from "./cardio";
 
 export type GoalId =
 
@@ -435,7 +436,38 @@ const SPORT_WORK: Record<Exclude<SportId, "ninguno">, Exercise[]> = {
   ],
 };
 
-function cardioFor(goal: GoalId, gym: GymId, week: number): Session {
+const ALL_POOLS: Exercise[][] = [
+  ...[PUSH, PULL, LEGS, SHOULDERS, FULLBODY].flatMap((p) => Object.values(p) as Exercise[][]),
+  HIIT,
+  INTERVALOS,
+  PLIO,
+  LOW_IMPACT,
+  ...Object.values(SPORT_WORK),
+];
+
+/** Alternatives for an exercise when the machine is busy or out of service. */
+export function alternativesFor(ex: Exercise, gym: GymId, exclude: string[] = []): Exercise[] {
+  const tier = GYM_TIER[gym];
+  const pool = ALL_POOLS.find((p) => p.some((e) => e.name === ex.name)) ?? [];
+  return pool
+    .filter((e) => e.name !== ex.name && !exclude.includes(e.name) && (e.tier ?? 0) <= tier)
+    .slice(0, 3)
+    .map((e) => ({ ...e, sets: ex.sets, reps: ex.reps, restSec: ex.restSec }));
+}
+
+function cardioFor(goal: GoalId, gym: GymId, week: number, prefs?: string[]): Session {
+  if (prefs && prefs.length) {
+    const opt = cardioOption(prefs[(week - 1) % prefs.length]!);
+    if (opt)
+      return {
+        day: "",
+        title: `CARDIO · ${opt.label.toUpperCase()}`,
+        method: opt.method,
+        focus: opt.blurb,
+        minutes: opt.minutes,
+        exercises: opt.exercises.map((e) => ({ ...e, tier: 0 })),
+      };
+  }
   if (goal === "bajar_peso" || goal === "recomposicion")
     return {
       day: "",
@@ -480,6 +512,7 @@ export type Profile = {
   sportActivity?:
     | { minutes: number; timesPerWeek: number; intensity: "baja" | "media" | "alta" }
     | undefined;
+  cardioPrefs?: string[] | undefined;
   bodyWeight: number;
   daysPerWeek: number;
   reminderTime: string;
@@ -593,7 +626,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
     strength = [push(0, 2), pull(0, 2), lower("PIERNA A", 0, 2), push(3, 2), pull(3, 2), lower("PIERNA B", 3, 2)];
   if (daysPerWeek === 3) strength = strength.slice(0, 2).map((s) => ({ ...s, focus: s.focus.replace(/≈\d+/, `≈${Math.round(weeklySets / 2)}`) }));
   sessions.push(...strength);
-  sessions.push(cardioFor(goal, gym, week));
+  sessions.push(cardioFor(goal, gym, week, profile.cardioPrefs));
 
   if (bias.extraMetabolic && goal !== "bajar_peso" && goal !== "recomposicion") {
     sessions.push({
