@@ -21,7 +21,7 @@ import {
   recommendedLoad,
 } from "@/lib/training";
 import { Onboarding } from "@/components/onboarding";
-import { nextReminderLabel, startReminderWatcher } from "@/lib/reminders";
+import { startReminderWatcher } from "@/lib/reminders";
 import { readoutFor } from "@/lib/body";
 
 
@@ -52,7 +52,11 @@ function Index() {
   const { log } = useLog();
   const [now, setNow] = useState<Date | null>(null);
 
-  useEffect(() => setNow(new Date()), []);
+  useEffect(() => {
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
 
   const plan = useMemo(
     () => (profile ? buildPlan(profile, log.week) : []),
@@ -94,7 +98,10 @@ function Index() {
       <header className="flex items-center justify-between px-5 pb-4 pt-7 rise">
         <div>
           <div className="font-display text-[11px] tracking-[0.25em] text-flame">
-            COACH · {nextReminderLabel(profile)}
+            MI RUTINA DE HOY ·{" "}
+            {now
+              ? now.toLocaleTimeString("es-CO", { hour: "numeric", minute: "2-digit", hour12: true })
+              : ""}
           </div>
           <h1 className="font-display text-[26px] leading-none tracking-tight text-balance">
             HOY, {now ? DAY_NAMES[now.getDay()] : ""}
