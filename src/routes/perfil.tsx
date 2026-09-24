@@ -148,6 +148,9 @@ function ProfileScreen() {
           </div>
         </div>
 
+        <SportActivityPanel profile={profile} onChange={save} />
+
+
 
         <div>
           <Label className="mb-2">Dónde entrenas</Label>

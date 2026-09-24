@@ -10,6 +10,7 @@ import {
   Screen,
   TabBar,
 } from "@/components/ui-kit";
+import { SportActivityPanel } from "@/components/sport-activity-panel";
 import { useLog, useProfile, bestSetFor, isSessionDoneToday } from "@/lib/store";
 import {
   METHODS,
@@ -219,6 +220,12 @@ function Index() {
             ))}
         </div>
       </section>
+
+      {profile.sport !== "ninguno" && (
+        <section className="mt-4 px-5 rise" style={{ animationDelay: "255ms" }}>
+          <SportActivityPanel profile={profile} onChange={save} />
+        </section>
+      )}
 
       <section className="mt-6 px-5 rise" style={{ animationDelay: "270ms" }}>
         <Label className="mb-2">Tu cuerpo hoy</Label>
