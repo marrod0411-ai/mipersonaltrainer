@@ -384,6 +384,17 @@ function ProfileScreen() {
         >
           BORRAR MI PLAN Y EMPEZAR DE CERO
         </Chip>
+
+        <Chip
+          onClick={() => {
+            window.localStorage.removeItem("pt.profile.v1");
+            window.localStorage.removeItem("pt.log.v1");
+            void supabase.auth.signOut();
+          }}
+          className="w-full text-center font-display text-[14px] tracking-[0.1em]"
+        >
+          CERRAR SESIÓN
+        </Chip>
       </div>
 
       <TabBar />
