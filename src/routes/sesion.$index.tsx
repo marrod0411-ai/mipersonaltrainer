@@ -18,13 +18,13 @@ import { METHODS, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
 export const Route = createFileRoute("/sesion/$index")({
   head: () => ({
     meta: [
-      { title: "Sesión de entrenamiento — Coach de Hierro" },
+      { title: "Sesión de entrenamiento — Mi Personal Trainer" },
       {
         name: "description",
         content:
           "Sigue tu sesión serie por serie con cargas recomendadas, descansos y registro de repeticiones.",
       },
-      { property: "og:title", content: "Sesión de entrenamiento — Coach de Hierro" },
+      { property: "og:title", content: "Sesión de entrenamiento — Mi Personal Trainer" },
       {
         property: "og:description",
         content: "Registra cada serie y deja que el coach ajuste tu carga progresiva.",

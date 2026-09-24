@@ -6,13 +6,13 @@ import { useLog, useProfile } from "@/lib/store";
 export const Route = createFileRoute("/progreso")({
   head: () => ({
     meta: [
-      { title: "Mi progreso — Coach de Hierro" },
+      { title: "Mi progreso — Mi Personal Trainer" },
       {
         name: "description",
         content:
           "Mira cómo suben tus cargas semana a semana, tus récords por ejercicio y las sesiones completadas.",
       },
-      { property: "og:title", content: "Mi progreso — Coach de Hierro" },
+      { property: "og:title", content: "Mi progreso — Mi Personal Trainer" },
       {
         property: "og:description",
         content: "Récords por ejercicio, volumen acumulado y progresión de cargas.",

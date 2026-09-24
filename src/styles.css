@@ -5,14 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-bg: #131110;
-  --color-surface: #1c1917;
-  --color-card: #242019;
-  --color-line: #372f28;
-  --color-ink: #f5efe6;
-  --color-mute: #a89f93;
-  --color-flame: #ff5a2b;
-  --color-clay: #6f5f52;
+  --color-bg: #111411;
+  --color-surface: #181d18;
+  --color-card: #202720;
+  --color-line: #2f3a2f;
+  --color-ink: #f4f7ef;
+  --color-mute: #9aa596;
+  --color-flame: #b8f500;
+  --color-clay: #56644f;
   --font-display: "Anton", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
@@ -24,7 +24,7 @@
   --color-foreground: var(--color-ink);
   --color-border: var(--color-line);
   --color-primary: var(--color-flame);
-  --color-primary-foreground: #ffffff;
+  --color-primary-foreground: #111411;
   --color-muted-foreground: var(--color-mute);
 }
 
@@ -72,46 +72,46 @@
   animation: click 0.45s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 @utility plate {
-  background: radial-gradient(circle at 32% 26%, #4a4038, #221d18 72%);
+  background: radial-gradient(circle at 32% 26%, #3a4638, #1a211a 72%);
   box-shadow:
     0 10px 20px rgba(0, 0, 0, 0.55),
     inset 0 2px 3px rgba(255, 255, 255, 0.09),
     inset 0 -7px 14px rgba(0, 0, 0, 0.55);
 }
 @utility plate-active {
-  background: radial-gradient(circle at 32% 26%, #ff9268, #ff5a2b 58%, #b23514 100%);
+  background: radial-gradient(circle at 32% 26%, #dcff6a, #b8f500 58%, #6f9400 100%);
   box-shadow:
-    0 10px 22px rgba(255, 90, 43, 0.4),
+    0 10px 22px rgba(184, 245, 0, 0.4),
     inset 0 2px 3px rgba(255, 255, 255, 0.22),
-    inset 0 -7px 14px rgba(140, 40, 15, 0.6);
+    inset 0 -7px 14px rgba(70, 100, 0, 0.6);
 }
 @utility plate-hole {
-  background: radial-gradient(circle at 50% 40%, #0d0b0a, #1a1613 70%);
+  background: radial-gradient(circle at 50% 40%, #0a0d0a, #161b16 70%);
   box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.75);
 }
 @utility chip {
-  background: radial-gradient(circle at 32% 26%, #3a322b, #211c18 74%);
+  background: radial-gradient(circle at 32% 26%, #2e382d, #1a201a 74%);
   box-shadow:
     0 5px 11px rgba(0, 0, 0, 0.5),
     inset 0 1px 2px rgba(255, 255, 255, 0.09),
     inset 0 -4px 8px rgba(0, 0, 0, 0.5);
 }
 @utility chip-active {
-  background: radial-gradient(circle at 32% 26%, #ff9268, #ff5a2b 60%, #b23514 100%);
+  background: radial-gradient(circle at 32% 26%, #dcff6a, #b8f500 60%, #6f9400 100%);
   box-shadow:
-    0 6px 14px rgba(255, 90, 43, 0.35),
+    0 6px 14px rgba(184, 245, 0, 0.35),
     inset 0 1px 2px rgba(255, 255, 255, 0.22),
-    inset 0 -4px 8px rgba(140, 40, 15, 0.6);
+    inset 0 -4px 8px rgba(70, 100, 0, 0.6);
 }
 @utility bar {
-  background: radial-gradient(circle at 50% 30%, #4a4038, #171310 78%);
+  background: radial-gradient(circle at 50% 30%, #3a4638, #101410 78%);
   box-shadow:
     inset 0 2px 5px rgba(0, 0, 0, 0.7),
     0 1px 0 rgba(255, 255, 255, 0.04);
 }
 @utility fill {
-  background: linear-gradient(180deg, #ff8a5c, #ff5a2b 55%, #d24419);
-  box-shadow: 0 0 12px rgba(255, 90, 43, 0.45);
+  background: linear-gradient(180deg, #d4ff4d, #b8f500 55%, #8fbf00);
+  box-shadow: 0 0 12px rgba(184, 245, 0, 0.45);
 }
 
 @layer base {

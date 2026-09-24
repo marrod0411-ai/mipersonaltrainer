@@ -114,7 +114,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
             PASO {step + 1} DE {STEPS}
           </div>
           <h1 className="font-display text-[30px] leading-none tracking-tight text-balance">
-            COACH DE HIERRO
+            MI PERSONAL TRAINER
           </h1>
         </div>
         <div className="flex items-end gap-1.5">

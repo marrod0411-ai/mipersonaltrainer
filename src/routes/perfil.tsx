@@ -47,13 +47,13 @@ function NumberField({
 export const Route = createFileRoute("/perfil")({
   head: () => ({
     meta: [
-      { title: "Mi perfil y objetivo — Coach de Hierro" },
+      { title: "Mi perfil y objetivo — Mi Personal Trainer" },
       {
         name: "description",
         content:
           "Cambia tu objetivo, nivel, deporte, peso corporal y la hora de tus recordatorios de entrenamiento.",
       },
-      { property: "og:title", content: "Mi perfil y objetivo — Coach de Hierro" },
+      { property: "og:title", content: "Mi perfil y objetivo — Mi Personal Trainer" },
       {
         property: "og:description",
         content: "Ajusta objetivo, nivel, deporte y recordatorios cuando quieras.",

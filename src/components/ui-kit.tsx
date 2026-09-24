@@ -79,7 +79,7 @@ export function Chip({
 }) {
   const classes = cn(
     "rounded-2xl px-3 py-2 text-left transition-transform active:translate-y-px",
-    active ? "chip-active text-white" : "chip text-ink",
+    active ? "chip-active text-bg" : "chip text-ink",
     className,
   );
   if (as === "div") return <div className={classes}>{children}</div>;
@@ -106,7 +106,7 @@ export function FlameButton({
       type={type}
       onClick={onClick}
       className={cn(
-        "w-full rounded-2xl chip-active py-3 font-display text-[15px] tracking-[0.1em] text-white transition-transform active:translate-y-px",
+        "w-full rounded-2xl chip-active py-3 font-display text-[15px] tracking-[0.1em] text-bg transition-transform active:translate-y-px",
         className,
       )}
     >
