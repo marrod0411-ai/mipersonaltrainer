@@ -10,6 +10,8 @@ import {
   Screen,
   TabBar,
 } from "@/components/ui-kit";
+import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
+import { RestTimer } from "@/components/rest-timer";
 import { useLog, useProfile } from "@/lib/store";
 import { METHODS, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
 
@@ -41,6 +43,9 @@ function SessionScreen() {
   const [doneSets, setDoneSets] = useState<Record<string, number>>({});
   const [repsInput, setRepsInput] = useState(8);
   const [loadOverride, setLoadOverride] = useState<Record<string, number>>({});
+  const [showGuide, setShowGuide] = useState(false);
+  const [restKey, setRestKey] = useState(0);
+  const [resting, setResting] = useState(false);
 
   const plan = useMemo(() => (profile ? buildPlan(profile, log.week) : []), [profile, log.week]);
   const session = plan[Number(index)];
@@ -79,6 +84,8 @@ function SessionScreen() {
       reps: repsInput,
     });
     setDoneSets((p) => ({ ...p, [exercise.name]: Math.min(exercise.sets, done + 1) }));
+    setRestKey((k) => k + 1);
+    setResting(true);
   };
 
   const finish = () => {
@@ -145,6 +152,13 @@ function SessionScreen() {
             {exercise.name.toUpperCase()} · SERIE {Math.min(done + 1, exercise.sets)}/
             {exercise.sets}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowGuide(true)}
+            className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
+          >
+            ▸ Ver técnica y video
+          </button>
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-2">
               {Array.from({ length: Math.min(exercise.sets, 7) }).map((_, i) => (
@@ -217,11 +231,28 @@ function SessionScreen() {
         </Card>
       </section>
 
+      {resting && (
+        <section className="mt-6 px-5 rise" style={{ animationDelay: "120ms" }}>
+          <RestTimer
+            key={restKey}
+            seconds={exercise.restSec}
+            onDone={() => setResting(false)}
+          />
+        </section>
+      )}
+
       <section className="mt-6 px-5 pb-10 rise" style={{ animationDelay: "240ms" }}>
         <FlameButton onClick={finish}>TERMINAR SESIÓN</FlameButton>
       </section>
 
       <TabBar />
+      {showGuide && (
+        <ExerciseGuideSheet
+          exercise={exercise}
+          kg={load}
+          onClose={() => setShowGuide(false)}
+        />
+      )}
     </Screen>
   );
 }
