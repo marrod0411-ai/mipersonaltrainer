@@ -10,9 +10,11 @@ export function ExerciseGuideSheet({
   exercise,
   kg,
   onClose,
+  beginner = false,
 }: {
   exercise: Exercise;
   kg: number;
+  beginner?: boolean;
   onClose: () => void;
 }) {
   const guide = guideFor(exercise.name);
@@ -21,6 +23,13 @@ export function ExerciseGuideSheet({
     queryKey: ["video", exercise.name],
     queryFn: () => fetchVideo({ data: { name: exercise.name } }),
     staleTime: Infinity,
+  });
+
+  const intro = useQuery({
+    queryKey: ["video-intro", exercise.name],
+    queryFn: () => fetchVideo({ data: { name: exercise.name, kind: "principiante" } }),
+    staleTime: Infinity,
+    enabled: beginner,
   });
 
   useEffect(() => {
@@ -76,6 +85,34 @@ export function ExerciseGuideSheet({
             ▸ Ver más videos de este ejercicio
           </a>
         </div>
+
+        {beginner && (
+          <div className="mt-5">
+            <Label className="mb-1">Si eres nuevo: explicación paso a paso</Label>
+            <p className="mb-2 text-[12px] text-mute">
+              Qué máquina o implemento usar, cómo ajustarlo y cómo moverte.
+            </p>
+            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-bg/60">
+              {intro.isLoading ? (
+                <div className="absolute inset-0 grid place-items-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
+                  Cargando video…
+                </div>
+              ) : intro.data?.id && intro.data.id !== video.data?.id ? (
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src={`https://www.youtube-nocookie.com/embed/${intro.data.id}?rel=0&playsinline=1`}
+                  title={`Explicación para principiantes: ${exercise.name}`}
+                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 grid place-items-center px-4 text-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
+                  Mira el video de arriba
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="mt-5">
           <Label className="mb-2">Cómo se ejecuta</Label>

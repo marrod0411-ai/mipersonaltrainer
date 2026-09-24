@@ -278,6 +278,7 @@ function SessionScreen() {
         <ExerciseGuideSheet
           exercise={exercise}
           kg={load}
+          beginner={profile.level !== "avanzado"}
           onClose={() => setShowGuide(false)}
         />
       )}
