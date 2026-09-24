@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Profile } from "./training";
+import { pushCloud } from "./cloud-sync";
 
 const PROFILE_KEY = "pt.profile.v1";
 const LOG_KEY = "pt.log.v1";
@@ -56,6 +57,7 @@ export function useProfile() {
   const save = useCallback((next: Profile) => {
     setProfile(next);
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+    pushCloud();
   }, []);
 
   const clear = useCallback(() => {
@@ -79,6 +81,7 @@ export function useLog() {
   const persist = useCallback((next: LogState) => {
     setLog(next);
     window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+    pushCloud();
   }, []);
 
   const addSet = useCallback(
@@ -92,6 +95,7 @@ export function useLog() {
           ],
         };
         window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+    pushCloud();
         return next;
       });
     },
@@ -104,6 +108,7 @@ export function useLog() {
       if (prev.completedSessions.includes(key)) return prev;
       const next = { ...prev, completedSessions: [...prev.completedSessions, key] };
       window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+    pushCloud();
       return next;
     });
   }, []);
@@ -112,6 +117,7 @@ export function useLog() {
     setLog((prev) => {
       const next = { ...prev, week: Math.max(1, week) };
       window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+    pushCloud();
       return next;
     });
   }, []);
