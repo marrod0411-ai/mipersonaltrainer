@@ -22,6 +22,13 @@
       "when": 1790287723259,
       "tag": "0002_community_photo_read",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790293131360,
+      "tag": "0003_challenges_privacy_reports",
+      "breakpoints": true
     }
   ]
 }

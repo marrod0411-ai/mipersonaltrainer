@@ -31,3 +31,9 @@ export const POST_KINDS = [
   { id: "progreso", label: "Mi progreso" },
   { id: "logro", label: "Logro" },
 ] as const;
+
+export const VISIBILITY = [
+  { id: "todos", label: "Comunidad", help: "Todas las personas registradas pueden verla." },
+  { id: "jurado", label: "Solo jurado", help: "Solo tú y el equipo que elige a los ganadores del reto." },
+  { id: "solo_yo", label: "Solo yo", help: "Privada: solo tú la ves (sirve para tu panel de progreso)." },
+] as const;

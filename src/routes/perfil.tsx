@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
+import { MeasureGuide } from "@/components/measure-guide";
 import { useProfile } from "@/lib/store";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
 import { CARDIO_OPTIONS } from "@/lib/cardio";
@@ -250,6 +251,7 @@ function ProfileScreen() {
               />
             </div>
           )}
+          <MeasureGuide sex={profile.sex} />
           <Label className="mt-5">Datos que ya tengas medidos</Label>
           <div className="mt-2 flex gap-2">
             <NumberField
