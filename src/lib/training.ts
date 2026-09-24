@@ -513,85 +513,86 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
   const method = hypertrophyMethod(level, goal);
   const sessions: Session[] = [];
 
-  const accCount = bias.heavyFocus ? 2 : 3;
-  const anchorCount = bias.heavyFocus ? 3 : 2;
+  // Volumen semanal por músculo basado en evidencia (Schoenfeld 2017, Krieger 2010,
+  // Israetel MEV–MAV): ~10 series iniciando, ~14 intermedio, ~18 avanzado,
+  // repartido en frecuencia 2x/semana y máx. ~10 series por músculo por sesión.
+  const weeklySets = level === "iniciando" ? 10 : level === "intermedio" ? 14 : 18;
+  const strengthDays =
+    daysPerWeek <= 2 ? 2 : daysPerWeek === 3 ? 3 : daysPerWeek - 1;
+  const perMuscle = (freq: number) =>
+    Math.max(1, Math.min(3, Math.round(weeklySets / freq / 3.5)));
+  const vol = (freq: number) =>
+    `≈${Math.round(weeklySets / freq)} series/músculo hoy · ${weeklySets}/semana`;
+  const split = (anchors: Exercise[], acc: Exercise[], n: number, off = 0) => {
+    const a = bias.heavyFocus ? n + 1 : n;
+    const c = bias.heavyFocus ? Math.max(1, n - 1) : n;
+    return [...pick(anchors, gym, a, week, off), ...pick(acc, gym, c, week, off)];
+  };
 
-  const strength: Session[] =
-    daysPerWeek <= 3
-      ? [
-          {
-            day: "",
-            title: "CUERPO COMPLETO A",
-            method: level === "iniciando" ? "piramidal" : method,
-            focus: "Patrones básicos",
-            minutes: 50,
-            exercises: [
-              ...pick(FULLBODY.anchors, gym, 3, week),
-              ...pick(FULLBODY.acc, gym, 2, week),
-            ],
-          },
-          {
-            day: "",
-            title: "CUERPO COMPLETO B",
-            method: "piramidal_inverso",
-            focus: "Tirón y pierna",
-            minutes: 52,
-            exercises: [
-              ...pick(PULL.anchors, gym, 2, week, 3),
-              ...pick(LEGS.anchors, gym, 1, week, 5),
-              ...pick(LEGS.acc, gym, 2, week, 2),
-            ],
-          },
-        ]
-      : [
-          {
-            day: "",
-            title: "PECHO · TRÍCEPS",
-            method,
-            focus: "Empuje",
-            minutes: 55,
-            exercises: [
-              ...pick(PUSH.anchors, gym, anchorCount, week),
-              ...pick(PUSH.acc, gym, accCount, week),
-            ],
-          },
-          {
-            day: "",
-            title: "ESPALDA · BÍCEPS",
-            method: level === "avanzado" ? "cluster" : "piramidal",
-            focus: "Tirón",
-            minutes: 58,
-            exercises: [
-              ...pick(PULL.anchors, gym, anchorCount, week, 1),
-              ...pick(PULL.acc, gym, accCount, week, 1),
-            ],
-          },
-          {
-            day: "",
-            title: "PIERNA COMPLETA",
-            method: goal === "fuerza" ? "piramidal" : "gvt",
-            focus: "Cuádriceps e isquios",
-            minutes: 62,
-            exercises: [
-              ...pick(LEGS.anchors, gym, anchorCount, week, 2),
-              ...pick(LEGS.acc, gym, accCount, week, 2),
-            ],
-          },
-          {
-            day: "",
-            title: "HOMBRO · CORE",
-            method: level === "avanzado" ? "dropset" : "prefatiga",
-            focus: "Deltoides y core",
-            minutes: 45,
-            exercises: [
-              ...pick(SHOULDERS.anchors, gym, 1, week, 1),
-              ...pick(SHOULDERS.acc, gym, 4, week, 1),
-            ],
-          },
-        ];
+  const fullBody = (title: string, off: number, freq: number): Session => {
+    const n = perMuscle(freq) >= 2 && level === "avanzado" ? 2 : 1;
+    return {
+      day: "",
+      title,
+      method: level === "iniciando" ? "piramidal" : off % 2 ? "piramidal_inverso" : method,
+      focus: `Cuerpo completo · ${vol(freq)}`,
+      minutes: 55,
+      exercises: [
+        ...pick(LEGS.anchors, gym, n, week, off),
+        ...pick(PUSH.anchors, gym, n, week, off),
+        ...pick(PULL.anchors, gym, n, week, off),
+        ...pick(SHOULDERS.acc, gym, 1, week, off),
+        ...pick(FULLBODY.acc, gym, 1, week, off),
+      ],
+    };
+  };
+  const upper = (title: string, off: number, freq: number): Session => {
+    const n = Math.min(2, perMuscle(freq));
+    return {
+      day: "",
+      title,
+      method,
+      focus: `Torso · ${vol(freq)}`,
+      minutes: 58,
+      exercises: [
+        ...pick(PUSH.anchors, gym, n, week, off),
+        ...pick(PULL.anchors, gym, n, week, off),
+        ...pick(SHOULDERS.acc, gym, 1, week, off),
+        ...pick(PUSH.acc, gym, 1, week, off),
+        ...pick(PULL.acc, gym, 1, week, off),
+      ],
+    };
+  };
+  const lower = (title: string, off: number, freq: number): Session => ({
+    day: "",
+    title,
+    method: goal === "fuerza" ? "piramidal" : level === "iniciando" ? "piramidal" : "gvt",
+    focus: `Pierna · ${vol(freq)}`,
+    minutes: 58,
+    exercises: split(LEGS.anchors, LEGS.acc, perMuscle(freq) + 1, off + 2),
+  });
+  const push = (off: number, freq: number): Session => ({
+    day: "", title: "PECHO · HOMBRO · TRÍCEPS", method, focus: `Empuje · ${vol(freq)}`, minutes: 58,
+    exercises: [...split(PUSH.anchors, PUSH.acc, perMuscle(freq), off), ...pick(SHOULDERS.acc, gym, 1, week, off)],
+  });
+  const pull = (off: number, freq: number): Session => ({
+    day: "", title: "ESPALDA · BÍCEPS", method: level === "avanzado" ? "cluster" : "piramidal",
+    focus: `Tirón · ${vol(freq)}`, minutes: 58,
+    exercises: split(PULL.anchors, PULL.acc, perMuscle(freq), off + 1),
+  });
 
-  const strengthCount = Math.max(2, Math.min(strength.length, daysPerWeek - 1));
-  sessions.push(...strength.slice(0, strengthCount));
+  let strength: Session[];
+  if (strengthDays === 2) strength = [fullBody("CUERPO COMPLETO A", 0, 2), fullBody("CUERPO COMPLETO B", 3, 2)];
+  else if (strengthDays === 3)
+    strength = [fullBody("CUERPO COMPLETO A", 0, 3), fullBody("CUERPO COMPLETO B", 3, 3), fullBody("CUERPO COMPLETO C", 6, 3)];
+  else if (strengthDays === 4)
+    strength = [upper("TORSO A", 0, 2), lower("PIERNA A", 0, 2), upper("TORSO B", 3, 2), lower("PIERNA B", 3, 2)];
+  else if (strengthDays === 5)
+    strength = [push(0, 2), pull(0, 2), lower("PIERNA A", 0, 2), upper("TORSO", 3, 2), lower("PIERNA B", 3, 2)];
+  else
+    strength = [push(0, 2), pull(0, 2), lower("PIERNA A", 0, 2), push(3, 2), pull(3, 2), lower("PIERNA B", 3, 2)];
+  if (daysPerWeek === 3) strength = strength.slice(0, 2).map((s) => ({ ...s, focus: s.focus.replace(/≈\d+/, `≈${Math.round(weeklySets / 2)}`) }));
+  sessions.push(...strength);
   sessions.push(cardioFor(goal, gym, week));
 
   if (bias.extraMetabolic && goal !== "bajar_peso" && goal !== "recomposicion") {
