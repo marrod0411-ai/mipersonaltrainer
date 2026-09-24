@@ -1,6 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { pullCloud } from "@/lib/cloud-sync";
+import { useRouterState } from "@tanstack/react-router";
+import { ensureCommunityProfile } from "@/lib/community";
 import { FlameButton, Label, Screen } from "@/components/ui-kit";
 
 const REMEMBER_KEY = "pt.remember";
@@ -26,6 +28,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       if (!active) return;
       if (data.user) {
         await pullCloud(data.user.id);
+        void ensureCommunityProfile(data.user);
         setUserId(data.user.id);
         setState("in");
       } else setState("out");
@@ -37,6 +40,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       } else if (event === "SIGNED_IN" && session?.user) {
         const id = session.user.id;
         setUserId((prev) => {
+          if (prev !== id) void ensureCommunityProfile(session.user);
           if (prev !== id)
             void pullCloud(id).then(() => {
               setUserId(id);
@@ -52,15 +56,25 @@ export function AuthGate({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const path = useRouterState({ select: (r) => r.location.pathname });
+  if (path === "/reset-password") return <>{children}</>;
   if (state === "loading") return <Screen />;
   if (state === "out") return <AuthScreen />;
   return <div key={userId ?? "u"}>{children}</div>;
 }
 
+const COUNTRIES = [
+  "Colombia", "México", "Argentina", "Chile", "Perú", "Ecuador", "Venezuela", "Bolivia",
+  "Paraguay", "Uruguay", "Costa Rica", "Panamá", "Guatemala", "Honduras", "El Salvador",
+  "Nicaragua", "República Dominicana", "Puerto Rico", "Cuba", "España", "Estados Unidos",
+  "Canadá", "Brasil", "Otro",
+];
+
 function AuthScreen() {
-  const [mode, setMode] = useState<"in" | "up">("in");
+  const [mode, setMode] = useState<"in" | "up" | "forgot">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("");
   const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -76,6 +90,14 @@ function AuthScreen() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      setMsg(error ? traducir(error.message) : "Listo. Revisa tu correo para crear una nueva contraseña.");
+      setBusy(false);
+      return;
+    }
     window.localStorage.setItem(REMEMBER_KEY, remember ? "1" : "0");
     window.sessionStorage.setItem("pt.active", "1");
     if (remember) window.localStorage.setItem(EMAIL_KEY, email);
@@ -85,7 +107,7 @@ function AuthScreen() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: { emailRedirectTo: window.location.origin, data: { country } },
       });
       if (error) setMsg(traducir(error.message));
       else if (!data.session)
@@ -97,20 +119,41 @@ function AuthScreen() {
     setBusy(false);
   };
 
+  const tab = (m: "in" | "up", label: string) => (
+    <button
+      type="button"
+      onClick={() => { setMode(m); setMsg(null); }}
+      className={`flex-1 rounded-2xl py-3 font-display text-[14px] tracking-[0.1em] ${
+        mode === m ? "chip-active text-bg" : "chip text-ink"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
     <Screen>
-      <div className="px-6 pt-20 rise">
+      <div className="px-6 pt-16 rise">
         <div className="font-display text-[11px] tracking-[0.3em] text-flame">MI PERSONAL TRAINER</div>
         <h1 className="mt-2 font-display text-[40px] leading-[0.9] tracking-tight">
-          {mode === "in" ? "BIENVENIDO DE NUEVO" : "CREA TU CUENTA"}
+          {mode === "in" ? "BIENVENIDO DE NUEVO" : mode === "up" ? "CREA TU CUENTA" : "RECUPERA TU CONTRASEÑA"}
         </h1>
         <p className="mt-3 text-[13px] leading-relaxed text-mute">
           {mode === "in"
             ? "Ingresa con tu correo y contraseña para seguir tu plan."
-            : "Regístrate una vez y tu plan te acompaña en cualquier dispositivo."}
+            : mode === "up"
+              ? "Regístrate una vez y tu plan te acompaña en cualquier dispositivo."
+              : "Escribe tu correo y te enviaremos un enlace para crear una nueva."}
         </p>
 
-        <form onSubmit={submit} className="mt-8 space-y-3">
+        {mode !== "forgot" && (
+          <div className="mt-6 flex gap-2">
+            {tab("in", "INICIAR SESIÓN")}
+            {tab("up", "REGISTRARME")}
+          </div>
+        )}
+
+        <form onSubmit={submit} className="mt-5 space-y-3">
           <Field label="Correo">
             <input
               type="email"
@@ -122,46 +165,74 @@ function AuthScreen() {
               placeholder="tu@correo.com"
             />
           </Field>
-          <Field label="Contraseña">
-            <input
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === "in" ? "current-password" : "new-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent text-[16px] text-ink outline-none"
-              placeholder="Mínimo 6 caracteres"
-            />
-          </Field>
+          {mode !== "forgot" && (
+            <Field label="Contraseña">
+              <input
+                type="password"
+                required
+                minLength={6}
+                autoComplete={mode === "in" ? "current-password" : "new-password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent text-[16px] text-ink outline-none"
+                placeholder="Mínimo 6 caracteres"
+              />
+            </Field>
+          )}
+          {mode === "up" && (
+            <Field label="País">
+              <select
+                required
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full bg-transparent text-[16px] text-ink outline-none"
+              >
+                <option value="" className="bg-card">Elige tu país</option>
+                {COUNTRIES.map((c) => (
+                  <option key={c} value={c} className="bg-card">{c}</option>
+                ))}
+              </select>
+            </Field>
+          )}
 
-          <label className="flex items-center gap-3 py-1">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="h-5 w-5 accent-[var(--color-flame)]"
-            />
-            <span className="text-[13px] text-ink">Recordar mi correo y mantener la sesión</span>
-          </label>
+          {mode === "in" && (
+            <button
+              type="button"
+              onClick={() => { setMode("forgot"); setMsg(null); }}
+              className="font-mono text-[10px] uppercase tracking-[0.15em] text-flame"
+            >
+              Olvidé mi contraseña
+            </button>
+          )}
+
+          {mode !== "forgot" && (
+            <label className="flex items-center gap-3 py-1">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="h-5 w-5 accent-[var(--color-flame)]"
+              />
+              <span className="text-[13px] text-ink">Recordar mi correo y mantener la sesión</span>
+            </label>
+          )}
 
           {msg && <p className="text-[13px] leading-relaxed text-flame">{msg}</p>}
 
           <FlameButton type="submit" className={busy ? "opacity-60" : ""}>
-            {busy ? "UN MOMENTO…" : mode === "in" ? "INGRESAR" : "REGISTRARME"}
+            {busy ? "UN MOMENTO…" : mode === "in" ? "INGRESAR" : mode === "up" ? "CREAR MI CUENTA" : "ENVIAR ENLACE"}
           </FlameButton>
         </form>
 
-        <button
-          type="button"
-          onClick={() => {
-            setMode(mode === "in" ? "up" : "in");
-            setMsg(null);
-          }}
-          className="mt-5 w-full text-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute"
-        >
-          {mode === "in" ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Ingresa"}
-        </button>
+        {mode === "forgot" && (
+          <button
+            type="button"
+            onClick={() => { setMode("in"); setMsg(null); }}
+            className="mt-5 w-full rounded-2xl chip py-3 font-display text-[14px] tracking-[0.1em] text-ink"
+          >
+            VOLVER A INICIAR SESIÓN
+          </button>
+        )}
       </div>
     </Screen>
   );
