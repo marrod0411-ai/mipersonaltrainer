@@ -331,7 +331,12 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
 
         {step === 6 && (
           <div className="rise">
-            <Label className="mb-1">¿Qué cardio te gusta más?</Label>
+            <Label className="mb-1">¿Con qué quieres empezar la semana?</Label>
+            <p className="mb-3 text-[12px] text-mute">
+              Tu primer día será esa parte del cuerpo y el resto de la semana se ordena a partir de ahí para que todo quede equilibrado.
+            </p>
+            <StartFocusPicker value={startFocus} onChange={setStartFocus} />
+            <Label className="mb-1 mt-6">¿Qué cardio te gusta más?</Label>
             <p className="mb-3 text-[12px] text-mute">Elige todos los que quieras. Los iré rotando cada semana.</p>
             <div className="grid grid-cols-2 gap-2">
               {CARDIO_OPTIONS.map((c) => (
