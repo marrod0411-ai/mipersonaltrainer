@@ -2,8 +2,9 @@ import { CARDIO_OPTIONS } from "@/lib/cardio";
 import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
 import { MeasureGuide } from "@/components/measure-guide";
+import { StartFocusPicker } from "@/components/start-focus-picker";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
-import type { GoalId, GymId, LevelId, Profile, SportId } from "@/lib/training";
+import type { GoalId, GymId, LevelId, Profile, SportId, StartFocusId } from "@/lib/training";
 import { analyzeBody } from "@/lib/body";
 import type { SexId } from "@/lib/body";
 import { requestNotifications } from "@/lib/reminders";
@@ -48,6 +49,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [goal, setGoal] = useState<GoalId>("masa_muscular");
   const [level, setLevel] = useState<LevelId>("intermedio");
   const [sport, setSport] = useState<SportId>("ninguno");
+  const [startFocus, setStartFocus] = useState<StartFocusId>("auto");
   const [cardioPrefs, setCardioPrefs] = useState<string[]>([]);
   const [gym, setGym] = useState<GymId>("completo");
   const [bodyWeight, setBodyWeight] = useState(75);
@@ -95,6 +97,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       level,
       sport,
       cardioPrefs,
+      startFocus,
       gym,
       bodyWeight,
       daysPerWeek,
