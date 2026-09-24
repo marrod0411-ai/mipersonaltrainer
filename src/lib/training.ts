@@ -435,7 +435,44 @@ const SPORT_WORK: Record<Exclude<SportId, "ninguno">, Exercise[]> = {
   ],
 };
 
-function cardioFor(goal: GoalId, gym: GymId, week: number): Session {
+const ALL_POOLS: Exercise[][] = [
+  ...Object.values(PUSH_POOLS_REF()),
+  HIIT,
+  INTERVALOS,
+  PLIO,
+  LOW_IMPACT,
+  ...Object.values(SPORT_WORK),
+];
+
+function PUSH_POOLS_REF(): Record<string, Exercise[]> {
+  const out: Record<string, Exercise[]> = {};
+  for (const [k, v] of Object.entries(POOLS_FOR_ALTS)) out[k] = v;
+  return out;
+}
+
+/** Alternatives for an exercise when the machine is busy or out of service. */
+export function alternativesFor(ex: Exercise, gym: GymId, exclude: string[] = []): Exercise[] {
+  const tier = GYM_TIER[gym];
+  const pool = ALL_POOLS.find((p) => p.some((e) => e.name === ex.name)) ?? [];
+  return pool
+    .filter((e) => e.name !== ex.name && !exclude.includes(e.name) && (e.tier ?? 0) <= tier)
+    .slice(0, 3)
+    .map((e) => ({ ...e, sets: ex.sets, reps: ex.reps, restSec: ex.restSec }));
+}
+
+function cardioFor(goal: GoalId, gym: GymId, week: number, prefs?: string[]): Session {
+  if (prefs && prefs.length) {
+    const opt = cardioOption(prefs[(week - 1) % prefs.length]!);
+    if (opt)
+      return {
+        day: "",
+        title: `CARDIO · ${opt.label.toUpperCase()}`,
+        method: opt.method,
+        focus: opt.blurb,
+        minutes: opt.minutes,
+        exercises: opt.exercises.map((e) => ({ ...e, tier: 0 })),
+      };
+  }
   if (goal === "bajar_peso" || goal === "recomposicion")
     return {
       day: "",
