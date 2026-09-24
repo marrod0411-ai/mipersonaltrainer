@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#131110" },
-      { title: "Coach de Hierro" },
+      { name: "theme-color", content: "#111411" },
+      { title: "Mi Personal Trainer" },
       {
         name: "description",
         content: "Tu entrenador personal: objetivo, nivel, cargas progresivas y recordatorios.",
       },
-      { property: "og:title", content: "Coach de Hierro" },
+      { property: "og:title", content: "Mi Personal Trainer" },
       {
         property: "og:description",
         content: "Tu entrenador personal: objetivo, nivel, cargas progresivas y recordatorios.",

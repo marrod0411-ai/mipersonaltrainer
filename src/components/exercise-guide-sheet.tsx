@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Label } from "@/components/ui-kit";
 import { guideFor, loadLine, videoSearchUrl } from "@/lib/exercise-guide";
+import { findExerciseVideo } from "@/lib/video.functions";
 import type { Exercise } from "@/lib/training";
 
 export function ExerciseGuideSheet({
@@ -13,6 +16,12 @@ export function ExerciseGuideSheet({
   onClose: () => void;
 }) {
   const guide = guideFor(exercise.name);
+  const fetchVideo = useServerFn(findExerciseVideo);
+  const video = useQuery({
+    queryKey: ["video", exercise.name],
+    queryFn: () => fetchVideo({ data: { name: exercise.name } }),
+    staleTime: Infinity,
+  });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -38,22 +47,35 @@ export function ExerciseGuideSheet({
           {loadLine(exercise, kg)}
         </div>
 
-        <a
-          href={videoSearchUrl(exercise.name)}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 flex items-center gap-3 rounded-2xl bg-bg/60 px-4 py-3"
-        >
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full chip-active">
-            <span className="ml-0.5 block h-0 w-0 border-y-[7px] border-l-[11px] border-y-transparent border-l-white" />
-          </span>
-          <span>
-            <span className="block font-display text-[15px] tracking-tight">VER VIDEO DEMOSTRATIVO</span>
-            <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-mute">
-              Ejecución y técnica en video
-            </span>
-          </span>
-        </a>
+        <div className="mt-4 overflow-hidden rounded-2xl bg-bg/60">
+          <div className="relative aspect-video w-full">
+            {video.isLoading ? (
+              <div className="absolute inset-0 grid place-items-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
+                Cargando video…
+              </div>
+            ) : video.data?.id ? (
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={`https://www.youtube-nocookie.com/embed/${video.data.id}?rel=0&playsinline=1`}
+                title={`Video: ${exercise.name}`}
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <div className="absolute inset-0 grid place-items-center px-4 text-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
+                Video no disponible
+              </div>
+            )}
+          </div>
+          <a
+            href={videoSearchUrl(exercise.name)}
+            target="_blank"
+            rel="noreferrer"
+            className="block px-4 py-2 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
+          >
+            ▸ Ver más videos de este ejercicio
+          </a>
+        </div>
 
         <div className="mt-5">
           <Label className="mb-2">Cómo se ejecuta</Label>

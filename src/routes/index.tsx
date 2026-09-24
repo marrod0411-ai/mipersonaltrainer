@@ -27,13 +27,13 @@ import { readoutFor } from "@/lib/body";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Coach de Hierro — tu entrenador personal" },
+      { title: "Mi Personal Trainer — tu entrenador personal" },
       {
         name: "description",
         content:
           "Plan de entrenamiento personal con métodos como FST-7, piramidales, HIIT y pliometría, cargas progresivas y recordatorios desde tu celular.",
       },
-      { property: "og:title", content: "Coach de Hierro — tu entrenador personal" },
+      { property: "og:title", content: "Mi Personal Trainer — tu entrenador personal" },
       {
         property: "og:description",
         content:

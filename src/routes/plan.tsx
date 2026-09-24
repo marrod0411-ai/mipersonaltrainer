@@ -7,13 +7,13 @@ import { METHODS, buildPlan, recommendedLoad } from "@/lib/training";
 export const Route = createFileRoute("/plan")({
   head: () => ({
     meta: [
-      { title: "Mi plan semanal — Coach de Hierro" },
+      { title: "Mi plan semanal — Mi Personal Trainer" },
       {
         name: "description",
         content:
           "Tu semana completa: FST-7, piramidales, GVT, descargas, cardio HIIT, pliometría y trabajo específico para tu deporte.",
       },
-      { property: "og:title", content: "Mi plan semanal — Coach de Hierro" },
+      { property: "og:title", content: "Mi plan semanal — Mi Personal Trainer" },
       {
         property: "og:description",
         content: "Cada día con su método, ejercicios, series y cargas recomendadas.",
@@ -125,7 +125,7 @@ function PlanScreen() {
             <Link
               to="/sesion/$index"
               params={{ index: String(i) }}
-              className="mt-4 block rounded-2xl chip-active py-2.5 text-center font-display text-[14px] tracking-[0.1em] text-white"
+              className="mt-4 block rounded-2xl chip-active py-2.5 text-center font-display text-[14px] tracking-[0.1em] text-bg"
             >
               ENTRENAR ESTE DÍA
             </Link>
