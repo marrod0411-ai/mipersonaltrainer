@@ -1,9 +1,7 @@
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { Label } from "@/components/ui-kit";
-import { guideFor, loadLine, videoSearchUrl } from "@/lib/exercise-guide";
-import { findExerciseVideo } from "@/lib/video.functions";
+import { ExerciseVideo } from "@/components/exercise-video";
+import { guideFor, loadLine } from "@/lib/exercise-guide";
 import type { Exercise } from "@/lib/training";
 
 export function ExerciseGuideSheet({
@@ -18,19 +16,6 @@ export function ExerciseGuideSheet({
   onClose: () => void;
 }) {
   const guide = guideFor(exercise.name);
-  const fetchVideo = useServerFn(findExerciseVideo);
-  const video = useQuery({
-    queryKey: ["video", exercise.name],
-    queryFn: () => fetchVideo({ data: { name: exercise.name } }),
-    staleTime: Infinity,
-  });
-
-  const intro = useQuery({
-    queryKey: ["video-intro", exercise.name],
-    queryFn: () => fetchVideo({ data: { name: exercise.name, kind: "principiante" } }),
-    staleTime: Infinity,
-    enabled: beginner,
-  });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -56,62 +41,14 @@ export function ExerciseGuideSheet({
           {loadLine(exercise, kg)}
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-2xl bg-bg/60">
-          <div className="relative aspect-video w-full">
-            {video.isLoading ? (
-              <div className="absolute inset-0 grid place-items-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
-                Cargando video…
-              </div>
-            ) : video.data?.id ? (
-              <iframe
-                className="absolute inset-0 h-full w-full"
-                src={`https://www.youtube-nocookie.com/embed/${video.data.id}?rel=0&playsinline=1`}
-                title={`Video: ${exercise.name}`}
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <div className="absolute inset-0 grid place-items-center px-4 text-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
-                Video no disponible
-              </div>
-            )}
-          </div>
-          <a
-            href={videoSearchUrl(exercise.name)}
-            target="_blank"
-            rel="noreferrer"
-            className="block px-4 py-2 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
-          >
-            ▸ Ver más videos de este ejercicio
-          </a>
+        <div className="mt-4">
+          <ExerciseVideo name={exercise.name} />
         </div>
-
         {beginner && (
-          <div className="mt-5">
-            <Label className="mb-1">Si eres nuevo: explicación paso a paso</Label>
-            <p className="mb-2 text-[12px] text-mute">
-              Qué máquina o implemento usar, cómo ajustarlo y cómo moverte.
-            </p>
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-bg/60">
-              {intro.isLoading ? (
-                <div className="absolute inset-0 grid place-items-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
-                  Cargando video…
-                </div>
-              ) : intro.data?.id && intro.data.id !== video.data?.id ? (
-                <iframe
-                  className="absolute inset-0 h-full w-full"
-                  src={`https://www.youtube-nocookie.com/embed/${intro.data.id}?rel=0&playsinline=1`}
-                  title={`Explicación para principiantes: ${exercise.name}`}
-                  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <div className="absolute inset-0 grid place-items-center px-4 text-center font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
-                  Mira el video de arriba
-                </div>
-              )}
-            </div>
-          </div>
+          <p className="mt-3 rounded-2xl bg-bg/60 px-4 py-3 text-[12px] leading-relaxed text-ink/90">
+            Si eres nuevo: ajusta el asiento o la barra a tu altura antes de empezar, usa poco peso las
+            primeras series y copia las tres posiciones de la imagen.
+          </p>
         )}
 
         <div className="mt-5">

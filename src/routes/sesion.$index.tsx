@@ -167,7 +167,7 @@ function SessionScreen() {
             onClick={() => setShowGuide(true)}
             className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-flame"
           >
-            ▸ Técnica paso a paso, errores comunes{profile.level !== "avanzado" ? " y video para principiantes" : ""}
+            ▸ Técnica completa, errores comunes y cargas
           </button>
           <MachineStatus
             value={status[exercise.name] ?? "ok"}
