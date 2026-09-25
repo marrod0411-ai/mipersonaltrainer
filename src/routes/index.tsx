@@ -19,6 +19,7 @@ import {
   goalLabel,
   levelLabel,
   recommendedLoad,
+  sessionKcal,
 } from "@/lib/training";
 import { Onboarding } from "@/components/onboarding";
 import { startReminderWatcher } from "@/lib/reminders";
@@ -139,7 +140,7 @@ function Index() {
             <div className="rounded-2xl bg-bg/60 px-3 py-2">
               <Label className="text-[9px] tracking-[0.15em]">Duración</Label>
               <div className="mt-0.5 font-display text-[15px] tracking-tight">
-                {session.minutes} MIN
+                {session.minutes} MIN · ≈{sessionKcal(session, profile.bodyWeight)} KCAL
               </div>
             </div>
             <div className="rounded-2xl bg-bg/60 px-3 py-2">
