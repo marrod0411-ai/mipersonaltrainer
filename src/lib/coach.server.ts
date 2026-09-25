@@ -26,7 +26,7 @@ export async function handleCoachChat(request: Request) {
   }
   const messages = Array.isArray(body.messages) ? body.messages.slice(-40) : [];
   if (!messages.length) return new Response("Bad request", { status: 400 });
-  const context = typeof body.context === "string" ? body.context.slice(0, 3000) : "";
+  const context = typeof body.context === "string" ? body.context.slice(0, 8000) : "";
 
   const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) return new Response("AI no configurada", { status: 500 });

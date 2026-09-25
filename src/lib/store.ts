@@ -15,13 +15,27 @@ export type SetLog = {
   reps: number;
 };
 
+export type Measurement = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  weight: number;
+  waist?: number | undefined;
+  neck?: number | undefined;
+  hip?: number | undefined;
+  bodyFat?: number | undefined; // medido
+  muscleMass?: number | undefined;
+};
+
 export type LogState = {
   week: number;
   completedSessions: string[];
   sets: SetLog[];
+  /** kcal por sesión completada, clave = "YYYY-MM-DD|titulo" */
+  kcal?: Record<string, number> | undefined;
+  measurements?: Measurement[] | undefined;
 };
 
-const emptyLog: LogState = { week: 1, completedSessions: [], sets: [] };
+const emptyLog: LogState = { week: 1, completedSessions: [], sets: [], kcal: {}, measurements: [] };
 
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -102,11 +116,15 @@ export function useLog() {
     [],
   );
 
-  const completeSession = useCallback((title: string) => {
+  const completeSession = useCallback((title: string, kcal?: number) => {
     setLog((prev) => {
       const key = `${new Date().toISOString().slice(0, 10)}|${title}`;
       if (prev.completedSessions.includes(key)) return prev;
-      const next = { ...prev, completedSessions: [...prev.completedSessions, key] };
+      const next = {
+        ...prev,
+        completedSessions: [...prev.completedSessions, key],
+        kcal: kcal ? { ...(prev.kcal ?? {}), [key]: kcal } : prev.kcal,
+      };
       window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
     pushCloud();
       return next;
@@ -122,7 +140,26 @@ export function useLog() {
     });
   }, []);
 
-  return { log, loaded, persist, addSet, completeSession, setWeek };
+  const saveMeasurement = useCallback((m: Measurement) => {
+    setLog((prev) => {
+      const list = (prev.measurements ?? []).filter((x) => x.id !== m.id);
+      const next = { ...prev, measurements: [...list, m].sort((a, b) => a.date.localeCompare(b.date)) };
+      window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+      pushCloud();
+      return next;
+    });
+  }, []);
+
+  const deleteMeasurement = useCallback((id: string) => {
+    setLog((prev) => {
+      const next = { ...prev, measurements: (prev.measurements ?? []).filter((x) => x.id !== id) };
+      window.localStorage.setItem(LOG_KEY, JSON.stringify(next));
+      pushCloud();
+      return next;
+    });
+  }, []);
+
+  return { log, loaded, persist, addSet, completeSession, setWeek, saveMeasurement, deleteMeasurement };
 }
 
 export function bestSetFor(sets: SetLog[], exercise: string) {
@@ -133,4 +170,10 @@ export function bestSetFor(sets: SetLog[], exercise: string) {
 
 export function isSessionDoneToday(log: LogState, title: string) {
   return log.completedSessions.includes(`${new Date().toISOString().slice(0, 10)}|${title}`);
+}
+
+/** Índice de la sesión que toca hoy: la primera del plan que aún no se ha completado hoy. */
+export function todaySessionIndex(plan: { title: string }[], log: LogState) {
+  const i = plan.findIndex((s) => !isSessionDoneToday(log, s.title));
+  return i === -1 ? 0 : i;
 }

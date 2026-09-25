@@ -707,11 +707,20 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
   }
 
   const trimmed = sessions.slice(0, Math.max(3, daysPerWeek));
+  const seen = new Map<string, number>();
 
   return trimmed.map((raw, i) => {
     const s = adaptForInjuries(raw, profile.injuries, gym, week + i);
+    let title = s.title;
+    if (STRENGTH_TITLE.test(raw.title)) {
+      title = regionTitle(raw.exercises, raw.title);
+      const n = (seen.get(title) ?? 0) + 1;
+      seen.set(title, n);
+      if (n > 1) title = `${title} · ${"I".repeat(n)}`;
+    }
     return {
       ...s,
+      title,
       day: DAYS[i % 7] ?? "",
       method: isDeload && s.exercises.some((e) => e.loadFactor) ? "descarga" : s.method,
       minutes: isDeload ? Math.round(s.minutes * 0.7) : s.minutes,
@@ -719,6 +728,42 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
   });
 }
 
+
+const STRENGTH_TITLE = /CUERPO COMPLETO|TORSO|PIERNA|PECHO|ESPALDA/;
+
+const MUSCLES: { name: string; lower: boolean; re: RegExp }[] = [
+  { name: "Pecho", lower: false, re: /press banca|press inclinado|declinado|convergente|flexiones|fondos en paralelas|aperturas|cruce|(?<!reverse )pec deck|press en máquina hammer/i },
+  { name: "Espalda", lower: false, re: /remo|dominad|jalón|pull-over|peso muerto (convencional|sumo)/i },
+  { name: "Hombro", lower: false, re: /press militar|arnold|press de hombro|tras nuca|elevaci\S* lateral|pájaros|reverse pec|elevación frontal|face pull/i },
+  { name: "Bíceps", lower: false, re: /curl (?!femoral|nórdico)|dominadas agarre supino/i },
+  { name: "Tríceps", lower: false, re: /tríceps|press francés|fondos|press banca/i },
+  { name: "Trapecio", lower: false, re: /encogimiento/i },
+  { name: "Abdomen", lower: false, re: /abdominal|crunch|elevación de piernas|plancha/i },
+  { name: "Cuádriceps", lower: true, re: /sentadilla|hack|prensa|zancada|cuádriceps/i },
+  { name: "Femoral", lower: true, re: /femoral|isquio|rumano|peso muerto/i },
+  { name: "Glúteo", lower: true, re: /hip thrust|glúteo|abductor|búlgara|zancada|sentadilla|prensa|rumano|peso muerto/i },
+  { name: "Aductores", lower: true, re: /aductor/i },
+  { name: "Pantorrilla", lower: true, re: /gemelo/i },
+];
+
+/** "TREN INFERIOR (Cuádriceps, Femoral, Glúteo)" según los ejercicios de la sesión. */
+export function regionTitle(exercises: Exercise[], kind?: string) {
+  const zone = kind ? (/PIERNA/.test(kind) ? "low" : /CUERPO COMPLETO/.test(kind) ? "both" : "up") : "both";
+  const hit = MUSCLES.filter(
+    (m) => (zone === "both" || (zone === "low") === m.lower) && exercises.some((e) => m.re.test(e.name)),
+  );
+  const region = zone === "both" ? "TREN SUPERIOR E INFERIOR" : zone === "low" ? "TREN INFERIOR" : "TREN SUPERIOR";
+  return hit.length ? `${region} (${hit.map((m) => m.name).join(", ")})` : region;
+}
+
+/** Calorías aproximadas de la sesión: MET × kg × horas. */
+export function sessionKcal(s: Session, bodyWeight: number) {
+  const met =
+    s.method === "hiit" ? 8 : s.method === "pliometria" ? 7.5 : s.method === "sport" ? 7 :
+    /CARDIO|INTERVALOS/.test(s.title) ? (/LISS|CAMINAR/.test(s.title) ? 4.5 : 7.5) :
+    s.method === "descarga" ? 3.5 : 5;
+  return Math.round(met * (bodyWeight || 70) * (s.minutes / 60));
+}
 
 export function deloadFactor(week: number) {
   return week > 0 && week % 4 === 0 ? 0.6 : 1;

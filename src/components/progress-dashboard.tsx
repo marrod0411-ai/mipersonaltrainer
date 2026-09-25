@@ -47,7 +47,7 @@ export function ProgressDashboard({ profile, log }: { profile: Profile; log: Log
     const end = weekStart(new Date());
     let start = weeks ? new Date(end.getTime() - (weeks - 1) * 7 * 86400000) : weekStart(first);
     if (start > end) start = end;
-    const rows: { w: string; volumen: number; sesiones: number; cardio: number; pasos: number; top: number }[] = [];
+    const rows: { w: string; volumen: number; sesiones: number; cardio: number; pasos: number; top: number; kcal: number }[] = [];
     for (let d = new Date(start); d <= end; d = new Date(d.getTime() + 7 * 86400000)) {
       const a = key(d);
       const b = key(new Date(d.getTime() + 7 * 86400000));
@@ -62,6 +62,7 @@ export function ProgressDashboard({ profile, log }: { profile: Profile; log: Log
         cardio,
         pasos: cardio * STEPS_PER_CARDIO_MIN + (sport?.stepsWeekly ?? 0),
         top: sets.reduce((m, s) => Math.max(m, s.kg), 0),
+        kcal: sessions.reduce((n, c) => n + (log.kcal?.[c] ?? 0), 0),
       });
     }
     return { rows, from: start };
@@ -87,7 +88,7 @@ export function ProgressDashboard({ profile, log }: { profile: Profile; log: Log
     },
   });
 
-  const sum = (k: "volumen" | "sesiones" | "cardio" | "pasos") => data.rows.reduce((n, r) => n + r[k], 0);
+  const sum = (k: "volumen" | "sesiones" | "cardio" | "pasos" | "kcal") => data.rows.reduce((n, r) => n + r[k], 0);
   const half = Math.floor(data.rows.length / 2);
   const avg = (rows: typeof data.rows) => (rows.length ? rows.reduce((n, r) => n + r.volumen, 0) / rows.length : 0);
   const before = avg(data.rows.slice(0, half));
@@ -99,6 +100,8 @@ export function ProgressDashboard({ profile, log }: { profile: Profile; log: Log
     { l: "Volumen", v: `${(sum("volumen") / 1000).toFixed(1)}t` },
     { l: "Cardio", v: `${sum("cardio")} min` },
     { l: "Pasos aprox.", v: `${Math.round(sum("pasos") / 1000)}k` },
+    { l: "Calorías quemadas", v: `${sum("kcal").toLocaleString("es")} kcal` },
+    { l: "Promedio / sesión", v: `${sum("sesiones") ? Math.round(sum("kcal") / sum("sesiones")) : 0} kcal` },
   ];
 
   return (
@@ -134,6 +137,16 @@ export function ProgressDashboard({ profile, log }: { profile: Profile; log: Log
           <YAxis tick={{ fontSize: 9, fill: "var(--color-mute)" }} width={38} />
           <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "transparent" }} />
           <Bar dataKey="volumen" fill="var(--color-flame)" radius={[6, 6, 0, 0]} />
+        </BarChart>
+      </ChartCard>
+
+      <ChartCard title="Calorías quemadas por semana (kcal)">
+        <BarChart data={data.rows}>
+          <CartesianGrid stroke="var(--color-line)" vertical={false} />
+          <XAxis dataKey="w" tick={{ fontSize: 9, fill: "var(--color-mute)" }} />
+          <YAxis tick={{ fontSize: 9, fill: "var(--color-mute)" }} width={38} />
+          <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "transparent" }} />
+          <Bar dataKey="kcal" fill="var(--color-flame)" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ChartCard>
 
