@@ -107,7 +107,7 @@ function SessionScreen() {
   };
 
   const finish = () => {
-    completeSession(session.title);
+    completeSession(session.title, sessionKcal(session, profile.bodyWeight));
     navigate({ to: "/progreso" });
   };
 
@@ -116,7 +116,7 @@ function SessionScreen() {
       <header className="flex items-center justify-between px-5 pb-4 pt-7 rise">
         <div>
           <div className="font-display text-[11px] tracking-[0.25em] text-flame">
-            {METHODS[session.method].label.toUpperCase()} · {session.minutes} MIN
+            {METHODS[session.method].label.toUpperCase()} · {session.minutes} MIN · ≈{sessionKcal(session, profile.bodyWeight)} KCAL
           </div>
           <h1 className="font-display text-[26px] leading-none tracking-tight text-balance">
             {session.title}
