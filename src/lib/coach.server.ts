@@ -10,7 +10,7 @@ Respuestas cortas y prácticas (máximo ~150 palabras salvo que pidan más), con
 export async function handleCoachChat(request: Request) {
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) return new Response("Unauthorized", { status: 401 });
-  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+  const supabase = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_PUBLISHABLE_KEY']!, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false },
   });
@@ -28,7 +28,7 @@ export async function handleCoachChat(request: Request) {
   if (!messages.length) return new Response("Bad request", { status: 400 });
   const context = typeof body.context === "string" ? body.context.slice(0, 3000) : "";
 
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) return new Response("AI no configurada", { status: 500 });
 
   const last = messages[messages.length - 1]!;

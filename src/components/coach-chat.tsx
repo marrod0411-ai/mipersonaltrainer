@@ -20,7 +20,7 @@ const QUICK = [
   "Me duele un poco, ¿qué hago?",
 ];
 
-export function CoachChatButton({ context, exerciseName }: { context: string; exerciseName?: string }) {
+export function CoachChatButton({ context, exerciseName }: { context: string; exerciseName?: string | undefined }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -38,7 +38,7 @@ export function CoachChatButton({ context, exerciseName }: { context: string; ex
   );
 }
 
-function CoachSheet({ context, exerciseName, onClose }: { context: string; exerciseName?: string; onClose: () => void }) {
+function CoachSheet({ context, exerciseName, onClose }: { context: string; exerciseName?: string | undefined; onClose: () => void }) {
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
