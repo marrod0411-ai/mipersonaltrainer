@@ -15,6 +15,7 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProgresoRouteImport } from './routes/progreso'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ApiCoachRouteImport } from './routes/api/coach'
 import { Route as SesionIndexRouteImport } from './routes/sesion.$index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCoachRoute = ApiCoachRouteImport.update({
+  id: '/api/coach',
+  path: '/api/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SesionIndexRoute = SesionIndexRouteImport.update({
   id: '/sesion/$index',
   path: '/sesion/$index',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/coach': typeof ApiCoachRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/coach': typeof ApiCoachRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/api/coach': typeof ApiCoachRoute
   '/sesion/$index': typeof SesionIndexRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/plan'
     | '/progreso'
     | '/reset-password'
+    | '/api/coach'
     | '/sesion/$index'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/plan'
     | '/progreso'
     | '/reset-password'
+    | '/api/coach'
     | '/sesion/$index'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/plan'
     | '/progreso'
     | '/reset-password'
+    | '/api/coach'
     | '/sesion/$index'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   PlanRoute: typeof PlanRoute
   ProgresoRoute: typeof ProgresoRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiCoachRoute: typeof ApiCoachRoute
   SesionIndexRoute: typeof SesionIndexRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/coach': {
+      id: '/api/coach'
+      path: '/api/coach'
+      fullPath: '/api/coach'
+      preLoaderRoute: typeof ApiCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sesion/$index': {
       id: '/sesion/$index'
       path: '/sesion/$index'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlanRoute: PlanRoute,
   ProgresoRoute: ProgresoRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiCoachRoute: ApiCoachRoute,
   SesionIndexRoute: SesionIndexRoute,
 }
 export const routeTree = rootRouteImport

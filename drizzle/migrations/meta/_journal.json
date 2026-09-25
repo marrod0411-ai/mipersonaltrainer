@@ -29,6 +29,13 @@
       "when": 1790293131360,
       "tag": "0003_challenges_privacy_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790352362709,
+      "tag": "0004_coach_chat",
+      "breakpoints": true
     }
   ]
 }
