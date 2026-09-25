@@ -489,7 +489,7 @@ function adaptForInjuries(s: Session, injuries: Injuries | undefined, gym: GymId
       if (alt) out.push(alt);
     }
   }
-  const strength = s.exercises.some((e) => e.loadFactor) || s.method !== "hiit";
+  const strength = !/CARDIO|METABÓLICO/.test(s.title);
   const extra = strength ? prehabFor(injuries, seed).filter((x) => !out.some((o) => o.name === x.name)) : [];
   const areas = injuries.items.map((i) => areaInfo(i.area).label.split(" /")[0]!.toLowerCase()).join(", ");
   return { ...s, exercises: [...out, ...extra], focus: `${s.focus} · cuida ${areas}` };
