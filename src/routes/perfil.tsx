@@ -97,7 +97,7 @@ function ProfileScreen() {
           {nextReminderLabel(profile)}
         </div>
         <h1 className="font-display text-[26px] leading-none tracking-tight">
-          {profile.name.toUpperCase()}
+          MI PERFIL · {profile.name.toUpperCase()}
         </h1>
       </header>
 
