@@ -176,6 +176,7 @@ function SessionScreen() {
               exercise,
               profile.gym ?? "completo",
               session.exercises.map((e) => e.name),
+              profile.injuries,
             )}
             onSwap={(alt) => {
               setSwaps((p) => ({ ...p, [exIndex]: alt }));
