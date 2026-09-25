@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   Chip,
@@ -13,7 +13,7 @@ import {
 import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
 import { ExerciseVideo } from "@/components/exercise-video";
 import { RestTimer } from "@/components/rest-timer";
-import { CoachChatButton } from "@/components/coach-chat";
+import { setCoachContext } from "@/components/coach-chat";
 import { useLog, useProfile } from "@/lib/store";
 import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
 import type { Exercise } from "@/lib/training";
@@ -82,6 +82,18 @@ function SessionScreen() {
   const done = doneSets[exercise.name] ?? 0;
   const totalSets = session.exercises.reduce((n, e) => n + e.sets, 0);
   const totalDone = Object.values(doneSets).reduce((a, b) => a + b, 0);
+
+  const coachContext = [
+          `Sesión: ${session.title} (${METHODS[session.method].label})`,
+          `Ejercicio actual: ${exercise.name} — ${exercise.sets} series x ${exercise.reps} reps, descanso ${exercise.restSec}s, carga sugerida ${load || "peso corporal"} kg, serie ${Math.min(done + 1, exercise.sets)}/${exercise.sets}`,
+          `Estado de la máquina: ${status[exercise.name] ?? "ok"}`,
+          `Ejercicios de hoy: ${session.exercises.map((e) => e.name).join(", ")}`,
+          `Perfil: nivel ${profile.level}, objetivo ${profile.goal}, gimnasio ${profile.gym ?? "completo"}, peso ${profile.bodyWeight} kg, semana ${log.week}`,
+          `Lesiones: ${JSON.stringify(profile.injuries ?? "ninguna")}`,
+        ].join("\n");
+  useEffect(() => {
+    setCoachContext(coachContext, exercise.name);
+  }, [coachContext, exercise.name]);
 
   const logSet = () => {
     addSet({
@@ -280,17 +292,6 @@ function SessionScreen() {
       </section>
 
       <TabBar />
-      <CoachChatButton
-        exerciseName={exercise.name}
-        context={[
-          `Sesión: ${session.title} (${METHODS[session.method].label})`,
-          `Ejercicio actual: ${exercise.name} — ${exercise.sets} series x ${exercise.reps} reps, descanso ${exercise.restSec}s, carga sugerida ${load || "peso corporal"} kg, serie ${Math.min(done + 1, exercise.sets)}/${exercise.sets}`,
-          `Estado de la máquina: ${status[exercise.name] ?? "ok"}`,
-          `Ejercicios de hoy: ${session.exercises.map((e) => e.name).join(", ")}`,
-          `Perfil: nivel ${profile.level}, objetivo ${profile.goal}, gimnasio ${profile.gym ?? "completo"}, peso ${profile.bodyWeight} kg, semana ${log.week}`,
-          `Lesiones: ${JSON.stringify(profile.injuries ?? "ninguna")}`,
-        ].join("\n")}
-      />
       {showGuide && (
         <ExerciseGuideSheet
           exercise={exercise}
