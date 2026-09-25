@@ -11,7 +11,7 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import coachAvatar from "@/assets/coach-avatar.jpg";
+import coachAvatar from "@/assets/coach-avatar.svg";
 
 const QUICK = [
   "Dame tips para este ejercicio",

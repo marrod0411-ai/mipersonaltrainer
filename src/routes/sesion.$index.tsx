@@ -13,6 +13,7 @@ import {
 import { ExerciseGuideSheet } from "@/components/exercise-guide-sheet";
 import { ExerciseVideo } from "@/components/exercise-video";
 import { RestTimer } from "@/components/rest-timer";
+import { CoachChatButton } from "@/components/coach-chat";
 import { useLog, useProfile } from "@/lib/store";
 import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
 import type { Exercise } from "@/lib/training";
@@ -279,6 +280,17 @@ function SessionScreen() {
       </section>
 
       <TabBar />
+      <CoachChatButton
+        exerciseName={exercise.name}
+        context={[
+          `Sesión: ${session.title} (${METHODS[session.method].label})`,
+          `Ejercicio actual: ${exercise.name} — ${exercise.sets} series x ${exercise.reps} reps, descanso ${exercise.restSec}s, carga sugerida ${load || "peso corporal"} kg, serie ${Math.min(done + 1, exercise.sets)}/${exercise.sets}`,
+          `Estado de la máquina: ${status[exercise.name] ?? "ok"}`,
+          `Ejercicios de hoy: ${session.exercises.map((e) => e.name).join(", ")}`,
+          `Perfil: nivel ${profile.level}, objetivo ${profile.goal}, gimnasio ${profile.gym ?? "completo"}, peso ${profile.bodyWeight} kg, semana ${log.week}`,
+          `Lesiones: ${JSON.stringify(profile.injuries ?? "ninguna")}`,
+        ].join("\n")}
+      />
       {showGuide && (
         <ExerciseGuideSheet
           exercise={exercise}
