@@ -151,7 +151,7 @@ export function MeasurementsPanel({
           </div>
           <MeasureGuide sex={profile.sex} />
           <div className="flex gap-2">
-            <button type="button" onClick={() => setDraft(null)} className="flex-1 rounded-full chip py-3 font-display text-[13px]">
+            <button type="button" onClick={() => setDraft(null)} className="flex-1 rounded-2xl chip py-3 font-display text-[13px]">
               CANCELAR
             </button>
             <div className="flex-1">

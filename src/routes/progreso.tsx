@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Card, Label, Plate, Screen, TabBar } from "@/components/ui-kit";
 import { useLog, useProfile } from "@/lib/store";
 import { ProgressDashboard } from "@/components/progress-dashboard";
+import { MeasurementsPanel } from "@/components/measurements-panel";
 
 export const Route = createFileRoute("/progreso")({
   head: () => ({
@@ -24,8 +25,8 @@ export const Route = createFileRoute("/progreso")({
 });
 
 function ProgressScreen() {
-  const { profile, loaded } = useProfile();
-  const { log } = useLog();
+  const { profile, loaded, save } = useProfile();
+  const { log, saveMeasurement, deleteMeasurement } = useLog();
 
   const byExercise = useMemo(() => {
     const map = new Map<string, { best: number; sets: number; history: number[] }>();
@@ -53,6 +54,17 @@ function ProgressScreen() {
       </header>
 
       <section className="px-5 rise" style={{ animationDelay: "60ms" }}>
+        {profile && (
+          <div className="mb-4">
+            <MeasurementsPanel
+              profile={profile}
+              measurements={log.measurements ?? []}
+              onSave={saveMeasurement}
+              onDelete={deleteMeasurement}
+              onProfile={save}
+            />
+          </div>
+        )}
         {profile && <ProgressDashboard profile={profile} log={log} />}
         <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-[0.12em] text-mute">
           Total histórico · {log.completedSessions.length} sesiones · {log.sets.length} series ·{" "}
