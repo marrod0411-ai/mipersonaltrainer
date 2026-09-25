@@ -387,13 +387,14 @@ function PostCard(props: {
               </span>
               <div className="flex shrink-0 gap-2 font-mono text-[9px] text-mute">
                 {c.user_id !== props.meId && (
-                  <button type="button" onClick={() => props.onReport({ commentId: c.id })}>
+                  <button type="button" aria-label="Reportar comentario" onClick={() => props.onReport({ commentId: c.id })}>
                     ⚑
                   </button>
                 )}
                 {(props.isAdmin || c.user_id === props.meId) && (
                   <button
                     type="button"
+                    aria-label="Borrar comentario"
                     onClick={async () => {
                       await supabase.from("comments").delete().eq("id", c.id);
                       props.onChange();

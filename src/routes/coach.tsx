@@ -32,6 +32,7 @@ function CoachScreen() {
 
   return (
     <>
+      <h1 className="sr-only">Tu Coach IA</h1>
       <CoachPanel context={context} exerciseName={session?.exerciseName} />
       <TabBar />
     </>
