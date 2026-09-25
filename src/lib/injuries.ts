@@ -47,7 +47,7 @@ export const INJURY_AREAS: AreaInfo[] = [
     label: "Espalda baja / lumbar",
     examples: "Hernia discal, lumbalgia, ciática",
     risky:
-      /peso muerto convencional|peso muerto sumo|sentadilla trasera|sentadilla frontal|remo con barra|pendlay|press militar de pie|burpee|profundidad|trineo|rueda abdominal|colgado|encogimientos con barra|zancadas caminando con barra/i,
+      /peso muerto convencional|peso muerto sumo|peso muerto rumano$|sentadilla trasera|sentadilla frontal|remo con barra|pendlay|press militar de pie|burpee|profundidad|trineo|rueda abdominal|colgado|encogimientos con barra|zancadas caminando con barra/i,
     prehab: [
       p("Bird dog", "10 por lado"),
       p("Dead bug", "10 por lado"),
