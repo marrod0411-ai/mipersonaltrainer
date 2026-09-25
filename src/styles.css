@@ -122,3 +122,13 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* App-colored scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-flame) transparent;
+}
+*::-webkit-scrollbar { height: 6px; width: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--color-flame); border-radius: 999px; }
+*::-webkit-scrollbar-button { display: none; }

@@ -13,32 +13,38 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import coachAvatar from "@/assets/coach-avatar.svg";
 
-const QUICK = [
+const QUICK_SESSION = [
   "Dame tips para este ejercicio",
   "Cámbiame este ejercicio por otro",
   "¿Cuánto peso debería usar?",
   "Me duele un poco, ¿qué hago?",
 ];
+const QUICK_GENERAL = [
+  "¿Qué entreno hoy?",
+  "¿Cómo voy con mi progreso?",
+  "¿Qué como antes de entrenar?",
+  "Me duele un poco, ¿qué hago?",
+];
 
-export function CoachChatButton({ context, exerciseName }: { context: string; exerciseName?: string | undefined }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label="Hablar con el coach"
-        className="fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-full chip-active py-1.5 pl-1.5 pr-4 shadow-lg sm:right-[calc(50%-200px)]"
-      >
-        <img src={coachAvatar} alt="" className="h-9 w-9 rounded-full" />
-        <span className="font-display text-[13px] tracking-[0.08em] text-bg">COACH IA</span>
-      </button>
-      {open && <CoachSheet context={context} exerciseName={exerciseName} onClose={() => setOpen(false)} />}
-    </>
-  );
+export function setCoachContext(context: string, exerciseName?: string) {
+  try {
+    sessionStorage.setItem("coach-context", JSON.stringify({ context, exerciseName, at: Date.now() }));
+  } catch {}
 }
 
-function CoachSheet({ context, exerciseName, onClose }: { context: string; exerciseName?: string | undefined; onClose: () => void }) {
+export function readCoachContext(): { context: string; exerciseName?: string } | null {
+  try {
+    const raw = sessionStorage.getItem("coach-context");
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    if (Date.now() - v.at > 3 * 60 * 60 * 1000) return null;
+    return v;
+  } catch {
+    return null;
+  }
+}
+
+export function CoachPanel({ context, exerciseName }: { context: string; exerciseName?: string | undefined }) {
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -59,17 +65,10 @@ function CoachSheet({ context, exerciseName, onClose }: { context: string; exerc
     };
   }, []);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm">
-      <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute inset-0 h-full w-full cursor-default" />
-      <div className="relative z-10 flex h-[88vh] w-full max-w-[430px] flex-col rounded-t-[32px] bg-card ring-1 ring-black/40">
-        <header className="flex items-center gap-3 border-b border-line/60 px-5 py-4">
+    <div className="mx-auto flex h-[calc(100dvh-49px)] w-full max-w-[430px] flex-col bg-bg text-ink">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <header className="flex items-center gap-3 border-b border-line/60 px-5 pb-4 pt-7">
           <img src={coachAvatar} alt="Coach IA" className="h-10 w-10 rounded-full" />
           <div className="flex-1">
             <div className="font-display text-[16px] leading-none tracking-tight text-ink">TU COACH IA</div>
@@ -77,13 +76,10 @@ function CoachSheet({ context, exerciseName, onClose }: { context: string; exerc
               {exerciseName ? `Ahora: ${exerciseName}` : "Pregúntame lo que quieras"}
             </div>
           </div>
-          <button type="button" onClick={onClose} className="font-mono text-[10px] uppercase tracking-[0.15em] text-mute">
-            Cerrar
-          </button>
         </header>
         {loadError && <p className="px-5 pt-2 text-[12px] text-flame">{loadError}</p>}
         {initial ? (
-          <CoachChat initial={initial} context={context} />
+          <CoachChat initial={initial} context={context} quick={exerciseName ? QUICK_SESSION : QUICK_GENERAL} />
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <Shimmer>Cargando conversación…</Shimmer>
@@ -94,7 +90,7 @@ function CoachSheet({ context, exerciseName, onClose }: { context: string; exerc
   );
 }
 
-function CoachChat({ initial, context }: { initial: UIMessage[]; context: string }) {
+function CoachChat({ initial, context, quick }: { initial: UIMessage[]; context: string; quick: string[] }) {
   const contextRef = useRef(context);
   contextRef.current = context;
   const [error, setError] = useState<string | null>(null);
@@ -141,7 +137,7 @@ function CoachChat({ initial, context }: { initial: UIMessage[]; context: string
             <div className="py-6 text-center">
               <img src={coachAvatar} alt="" className="mx-auto h-16 w-16 rounded-full" />
               <p className="mt-3 text-[13px] leading-relaxed text-mute">
-                Estoy contigo en el entrenamiento. Pídeme tips, un cambio de ejercicio o ayuda con las cargas.
+                Pregúntame lo que quieras: técnica, cambios de ejercicio, cargas, cardio, alimentación o cómo seguir tu plan.
               </p>
             </div>
           )}
@@ -176,7 +172,7 @@ function CoachChat({ initial, context }: { initial: UIMessage[]; context: string
 
       <div className="border-t border-line/60 px-4 pb-4 pt-3">
         <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
-          {QUICK.map((q) => (
+          {quick.map((q) => (
             <button
               key={q}
               type="button"

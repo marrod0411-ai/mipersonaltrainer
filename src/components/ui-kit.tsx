@@ -130,6 +130,7 @@ const TABS = [
   { to: "/", label: "HOY" },
   { to: "/plan", label: "PLAN" },
   { to: "/progreso", label: "PROGRESO" },
+  { to: "/coach", label: "COACH IA" },
   { to: "/comunidad", label: "COMUNIDAD" },
   { to: "/perfil", label: "PERFIL" },
 ] as const;
@@ -137,12 +138,12 @@ const TABS = [
 export function TabBar() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-line/60 bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex max-w-[430px] items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-[430px] items-center justify-between px-3 py-3">
         {TABS.map((t) => (
           <Link
             key={t.to}
             to={t.to}
-            className="font-display text-[11px] tracking-[0.1em] text-mute"
+            className="font-display text-[10px] tracking-[0.06em] text-mute"
             activeProps={{ className: "text-flame" }}
             activeOptions={{ exact: t.to === "/" }}
           >
