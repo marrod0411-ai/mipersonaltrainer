@@ -15,7 +15,7 @@ import { ExerciseVideo } from "@/components/exercise-video";
 import { RestTimer } from "@/components/rest-timer";
 import { setCoachContext } from "@/components/coach-chat";
 import { useLog, useProfile } from "@/lib/store";
-import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad } from "@/lib/training";
+import { METHODS, alternativesFor, buildPlan, recommendedLoad, roundLoad, sessionKcal } from "@/lib/training";
 import type { Exercise } from "@/lib/training";
 
 export const Route = createFileRoute("/sesion/$index")({
