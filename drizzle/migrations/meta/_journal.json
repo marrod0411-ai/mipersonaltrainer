@@ -36,6 +36,13 @@
       "when": 1790352362709,
       "tag": "0004_coach_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790353699119,
+      "tag": "0005_tighten_community_read_policies",
+      "breakpoints": true
     }
   ]
 }
