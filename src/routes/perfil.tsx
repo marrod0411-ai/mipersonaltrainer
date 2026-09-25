@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Card, Chip, FlameButton, Label, Screen, TabBar } from "@/components/ui-kit";
 import { MeasureGuide } from "@/components/measure-guide";
 import { StartFocusPicker } from "@/components/start-focus-picker";
+import { InjuryPicker } from "@/components/injury-picker";
 import { useProfile } from "@/lib/store";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
 import { CARDIO_OPTIONS } from "@/lib/cardio";
@@ -180,6 +181,14 @@ function ProfileScreen() {
             value={profile.startFocus ?? "auto"}
             onChange={(v) => patch({ startFocus: v })}
             daysPerWeek={profile.daysPerWeek}
+          />
+        </div>
+
+        <div>
+          <Label className="mb-2">Lesiones y restricciones</Label>
+          <InjuryPicker
+            value={profile.injuries ?? { items: [], notes: "" }}
+            onChange={(v) => patch({ injuries: v })}
           />
         </div>
 

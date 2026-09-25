@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { Card, Chip, FlameButton, Label, Plate, Screen } from "@/components/ui-kit";
 import { MeasureGuide } from "@/components/measure-guide";
 import { StartFocusPicker } from "@/components/start-focus-picker";
+import { InjuryPicker } from "@/components/injury-picker";
+import type { Injuries } from "@/lib/injuries";
 import { GOALS, GYMS, LEVELS, SPORTS } from "@/lib/training";
 import type { GoalId, GymId, LevelId, Profile, SportId, StartFocusId } from "@/lib/training";
 import { analyzeBody } from "@/lib/body";
@@ -10,7 +12,7 @@ import type { SexId } from "@/lib/body";
 import { requestNotifications } from "@/lib/reminders";
 
 const DAY_LABELS = ["D", "L", "M", "M", "J", "V", "S"];
-const STEPS = 8;
+const STEPS = 9;
 
 function NumberField({
   label,
@@ -51,6 +53,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
   const [sport, setSport] = useState<SportId>("ninguno");
   const [startFocus, setStartFocus] = useState<StartFocusId>("auto");
   const [cardioPrefs, setCardioPrefs] = useState<string[]>([]);
+  const [injuries, setInjuries] = useState<Injuries>({ items: [], notes: "" });
   const [gym, setGym] = useState<GymId>("completo");
   const [bodyWeight, setBodyWeight] = useState(75);
   const [daysPerWeek, setDaysPerWeek] = useState(4);
@@ -98,6 +101,7 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
       sport,
       cardioPrefs,
       startFocus,
+      injuries,
       gym,
       bodyWeight,
       daysPerWeek,
@@ -360,6 +364,16 @@ export function Onboarding({ onDone }: { onDone: (p: Profile) => void }) {
         )}
 
         {step === 7 && (
+          <div className="rise">
+            <Label className="mb-1">¿Tienes o has tenido lesiones?</Label>
+            <p className="mb-3 text-[12px] text-mute">
+              Rodillas, espalda, columna, esguinces, ligamentos… Así tu plan evita recaídas y fortalece esas zonas.
+            </p>
+            <InjuryPicker value={injuries} onChange={setInjuries} />
+          </div>
+        )}
+
+        {step === 8 && (
           <Card className="rise">
             <Label>Recordatorio de entrenamiento</Label>
             <input
