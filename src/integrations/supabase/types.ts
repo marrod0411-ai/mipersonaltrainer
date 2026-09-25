@@ -246,6 +246,57 @@ export type Database = {
           },
         ]
       }
+      trainer_students: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string
+          plan: Json | null
+          profile: Json
+          trainer_id: string
+          updated_at: string
+          week: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string
+          plan?: Json | null
+          profile: Json
+          trainer_id?: string
+          updated_at?: string
+          week?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string
+          plan?: Json | null
+          profile?: Json
+          trainer_id?: string
+          updated_at?: string
+          week?: number
+        }
+        Relationships: []
+      }
+      trainers: {
+        Row: {
+          created_at: string
+          display_name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_data: {
         Row: {
           log: Json | null

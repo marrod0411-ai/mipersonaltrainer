@@ -43,6 +43,13 @@
       "when": 1790353699119,
       "tag": "0005_tighten_community_read_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790377207277,
+      "tag": "0006_trainers_and_students",
+      "breakpoints": true
     }
   ]
 }

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as ComunidadRouteImport } from './routes/comunidad'
+import { Route as EntrenadorRouteImport } from './routes/entrenador'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as ProgresoRouteImport } from './routes/progreso'
@@ -32,6 +33,11 @@ const CoachRoute = CoachRouteImport.update({
 const ComunidadRoute = ComunidadRouteImport.update({
   id: '/comunidad',
   path: '/comunidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrenadorRoute = EntrenadorRouteImport.update({
+  id: '/entrenador',
+  path: '/entrenador',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/comunidad': typeof ComunidadRoute
+  '/entrenador': typeof EntrenadorRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/comunidad': typeof ComunidadRoute
+  '/entrenador': typeof EntrenadorRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/comunidad': typeof ComunidadRoute
+  '/entrenador': typeof EntrenadorRoute
   '/perfil': typeof PerfilRoute
   '/plan': typeof PlanRoute
   '/progreso': typeof ProgresoRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/comunidad'
+    | '/entrenador'
     | '/perfil'
     | '/plan'
     | '/progreso'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/comunidad'
+    | '/entrenador'
     | '/perfil'
     | '/plan'
     | '/progreso'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/comunidad'
+    | '/entrenador'
     | '/perfil'
     | '/plan'
     | '/progreso'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoachRoute: typeof CoachRoute
   ComunidadRoute: typeof ComunidadRoute
+  EntrenadorRoute: typeof EntrenadorRoute
   PerfilRoute: typeof PerfilRoute
   PlanRoute: typeof PlanRoute
   ProgresoRoute: typeof ProgresoRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/comunidad'
       fullPath: '/comunidad'
       preLoaderRoute: typeof ComunidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrenador': {
+      id: '/entrenador'
+      path: '/entrenador'
+      fullPath: '/entrenador'
+      preLoaderRoute: typeof EntrenadorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoachRoute: CoachRoute,
   ComunidadRoute: ComunidadRoute,
+  EntrenadorRoute: EntrenadorRoute,
   PerfilRoute: PerfilRoute,
   PlanRoute: PlanRoute,
   ProgresoRoute: ProgresoRoute,
