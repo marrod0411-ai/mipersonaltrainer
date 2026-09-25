@@ -713,7 +713,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
     const s = adaptForInjuries(raw, profile.injuries, gym, week + i);
     let title = s.title;
     if (STRENGTH_TITLE.test(raw.title)) {
-      title = regionTitle(raw.exercises);
+      title = regionTitle(raw.exercises, raw.title);
       const n = (seen.get(title) ?? 0) + 1;
       seen.set(title, n);
       if (n > 1) title = `${title} · ${"I".repeat(n)}`;
@@ -747,11 +747,12 @@ const MUSCLES: { name: string; lower: boolean; re: RegExp }[] = [
 ];
 
 /** "TREN INFERIOR (Cuádriceps, Femoral, Glúteo)" según los ejercicios de la sesión. */
-export function regionTitle(exercises: Exercise[]) {
-  const hit = MUSCLES.filter((m) => exercises.some((e) => m.re.test(e.name)));
-  const up = hit.some((m) => !m.lower && m.name !== "Abdomen");
-  const low = hit.some((m) => m.lower);
-  const region = up && low ? "TREN SUPERIOR E INFERIOR" : low ? "TREN INFERIOR" : "TREN SUPERIOR";
+export function regionTitle(exercises: Exercise[], kind?: string) {
+  const zone = kind ? (/PIERNA/.test(kind) ? "low" : /CUERPO COMPLETO/.test(kind) ? "both" : "up") : "both";
+  const hit = MUSCLES.filter(
+    (m) => (zone === "both" || (zone === "low") === m.lower) && exercises.some((e) => m.re.test(e.name)),
+  );
+  const region = zone === "both" ? "TREN SUPERIOR E INFERIOR" : zone === "low" ? "TREN INFERIOR" : "TREN SUPERIOR";
   return hit.length ? `${region} (${hit.map((m) => m.name).join(", ")})` : region;
 }
 
