@@ -326,6 +326,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_challenge_participant: {
+        Args: { _quarter: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
