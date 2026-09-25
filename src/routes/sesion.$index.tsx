@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Card,
   Chip,
@@ -91,9 +91,7 @@ function SessionScreen() {
           `Perfil: nivel ${profile.level}, objetivo ${profile.goal}, gimnasio ${profile.gym ?? "completo"}, peso ${profile.bodyWeight} kg, semana ${log.week}`,
           `Lesiones: ${JSON.stringify(profile.injuries ?? "ninguna")}`,
         ].join("\n");
-  useEffect(() => {
-    setCoachContext(coachContext, exercise.name);
-  }, [coachContext, exercise.name]);
+  if (typeof window !== "undefined") setCoachContext(coachContext, exercise.name);
 
   const logSet = () => {
     addSet({
