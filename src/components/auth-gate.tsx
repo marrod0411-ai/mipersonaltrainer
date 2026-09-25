@@ -57,7 +57,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }, []);
 
   const path = useRouterState({ select: (r) => r.location.pathname });
-  if (path === "/reset-password") return <>{children}</>;
+  if (path === "/reset-password" || path.startsWith("/entrenador")) return <>{children}</>;
   if (state === "loading") return <Screen />;
   if (state === "out") return <AuthScreen />;
   return <div key={userId ?? "u"}>{children}</div>;
@@ -218,6 +218,7 @@ function AuthScreen() {
           )}
 
           {msg && <p className="text-[13px] leading-relaxed text-flame">{msg}</p>}
+          <a href="/entrenador" className="block py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-mute underline">¿Eres entrenador? Ingresa aquí</a>
 
           <FlameButton type="submit" className={busy ? "opacity-60" : ""}>
             {busy ? "UN MOMENTO…" : mode === "in" ? "INGRESAR" : mode === "up" ? "CREAR MI CUENTA" : "ENVIAR ENLACE"}
