@@ -732,7 +732,7 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
 const STRENGTH_TITLE = /CUERPO COMPLETO|TORSO|PIERNA|PECHO|ESPALDA/;
 
 const MUSCLES: { name: string; lower: boolean; re: RegExp }[] = [
-  { name: "Pecho", lower: false, re: /press banca|press inclinado|declinado|convergente|flexiones|fondos en paralelas|aperturas|cruce|pec deck(?!.)|press en máquina hammer/i },
+  { name: "Pecho", lower: false, re: /press banca|press inclinado|declinado|convergente|flexiones|fondos en paralelas|aperturas|cruce|(?<!reverse )pec deck|press en máquina hammer/i },
   { name: "Espalda", lower: false, re: /remo|dominad|jalón|pull-over|peso muerto (convencional|sumo)/i },
   { name: "Hombro", lower: false, re: /press militar|arnold|press de hombro|tras nuca|elevaci\S* lateral|pájaros|reverse pec|elevación frontal|face pull/i },
   { name: "Bíceps", lower: false, re: /curl (?!femoral|nórdico)|dominadas agarre supino/i },
