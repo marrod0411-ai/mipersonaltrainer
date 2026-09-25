@@ -1,5 +1,7 @@
 import { bodyBias } from "./body";
 import { cardioOption } from "./cardio";
+import { areaInfo, isRisky, prehabFor } from "./injuries";
+import type { Injuries } from "./injuries";
 
 export type GoalId =
 
@@ -455,13 +457,42 @@ const ALL_POOLS: Exercise[][] = [
 ];
 
 /** Alternatives for an exercise when the machine is busy or out of service. */
-export function alternativesFor(ex: Exercise, gym: GymId, exclude: string[] = []): Exercise[] {
+export function alternativesFor(
+  ex: Exercise,
+  gym: GymId,
+  exclude: string[] = [],
+  injuries?: Injuries,
+): Exercise[] {
   const tier = GYM_TIER[gym];
   const pool = ALL_POOLS.find((p) => p.some((e) => e.name === ex.name)) ?? [];
   return pool
-    .filter((e) => e.name !== ex.name && !exclude.includes(e.name) && (e.tier ?? 0) <= tier)
+    .filter(
+      (e) =>
+        e.name !== ex.name &&
+        !exclude.includes(e.name) &&
+        (e.tier ?? 0) <= tier &&
+        !isRisky(e, injuries),
+    )
     .slice(0, 3)
     .map((e) => ({ ...e, sets: ex.sets, reps: ex.reps, restSec: ex.restSec }));
+}
+
+/** Replaces exercises that stress an injured area and adds prevention work. */
+function adaptForInjuries(s: Session, injuries: Injuries | undefined, gym: GymId, seed: number): Session {
+  if (!injuries?.items.length) return s;
+  const names = s.exercises.map((e) => e.name);
+  const out: Exercise[] = [];
+  for (const e of s.exercises) {
+    if (!isRisky(e, injuries)) out.push(e);
+    else {
+      const alt = alternativesFor(e, gym, [...names, ...out.map((o) => o.name)], injuries)[0];
+      if (alt) out.push(alt);
+    }
+  }
+  const strength = s.exercises.some((e) => e.loadFactor) || s.method !== "hiit";
+  const extra = strength ? prehabFor(injuries, seed).filter((x) => !out.some((o) => o.name === x.name)) : [];
+  const areas = injuries.items.map((i) => areaInfo(i.area).label.split(" /")[0]!.toLowerCase()).join(", ");
+  return { ...s, exercises: [...out, ...extra], focus: `${s.focus} · cuida ${areas}` };
 }
 
 function cardioFor(goal: GoalId, gym: GymId, week: number, prefs?: string[]): Session {
@@ -523,6 +554,7 @@ export type Profile = {
     | undefined;
   cardioPrefs?: string[] | undefined;
   startFocus?: StartFocusId | undefined;
+  injuries?: Injuries | undefined;
   bodyWeight: number;
   daysPerWeek: number;
   reminderTime: string;
@@ -676,12 +708,15 @@ export function buildPlan(profile: Profile, week = 1): Session[] {
 
   const trimmed = sessions.slice(0, Math.max(3, daysPerWeek));
 
-  return trimmed.map((s, i) => ({
-    ...s,
-    day: DAYS[i % 7] ?? "",
-    method: isDeload && s.exercises.some((e) => e.loadFactor) ? "descarga" : s.method,
-    minutes: isDeload ? Math.round(s.minutes * 0.7) : s.minutes,
-  }));
+  return trimmed.map((raw, i) => {
+    const s = adaptForInjuries(raw, profile.injuries, gym, week + i);
+    return {
+      ...s,
+      day: DAYS[i % 7] ?? "",
+      method: isDeload && s.exercises.some((e) => e.loadFactor) ? "descarga" : s.method,
+      minutes: isDeload ? Math.round(s.minutes * 0.7) : s.minutes,
+    };
+  });
 }
 
 
