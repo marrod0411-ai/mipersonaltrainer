@@ -158,7 +158,7 @@ const blank: Profile = {
   reminderTime: "07:00", reminderDays: [], gym: "completo", injuries: { items: [], notes: "" },
 };
 
-function Num({ label, value, onChange }: { label: string; value?: number; onChange: (v: number | undefined) => void }) {
+function Num({ label, value, onChange }: { label: string; value?: number | undefined; onChange: (v: number | undefined) => void }) {
   return (
     <label className="block">
       <Label>{label}</Label>
