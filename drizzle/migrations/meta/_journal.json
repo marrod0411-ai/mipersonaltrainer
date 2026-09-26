@@ -50,6 +50,13 @@
       "when": 1790377207277,
       "tag": "0006_trainers_and_students",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790388680758,
+      "tag": "0007_subscriptions",
+      "breakpoints": true
     }
   ]
 }
