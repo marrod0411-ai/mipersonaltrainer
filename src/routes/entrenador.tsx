@@ -158,7 +158,7 @@ const blank: Profile = {
   reminderTime: "07:00", reminderDays: [], gym: "completo", injuries: { items: [], notes: "" },
 };
 
-function Num({ label, value, onChange }: { label: string; value?: number; onChange: (v: number | undefined) => void }) {
+function Num({ label, value, onChange }: { label: string; value?: number | undefined; onChange: (v: number | undefined) => void }) {
   return (
     <label className="block">
       <Label>{label}</Label>
@@ -233,7 +233,7 @@ function StudentEditor({ student, onClose }: { student: Student | null; onClose:
           </div>
           {r && (
             <div className="mt-2 text-[12px] text-mute">
-              {r.bodyFat != null && <>Grasa ≈{r.bodyFat}% · </>}{r.bmi != null && <>IMC {r.bmi} · </>}≈{r.targetKcal} kcal/día
+              {r.bodyFat != null && <>Grasa ≈{r.bodyFat}% · </>}{r.bmi != null && <>IMC {r.bmi} · </>}{r.calories != null && <>≈{r.calories} kcal/día</>}
             </div>
           )}
         </Section>
