@@ -233,7 +233,7 @@ function StudentEditor({ student, onClose }: { student: Student | null; onClose:
           </div>
           {r && (
             <div className="mt-2 text-[12px] text-mute">
-              {r.bodyFat != null && <>Grasa ≈{r.bodyFat}% · </>}{r.bmi != null && <>IMC {r.bmi} · </>}≈{r.targetKcal} kcal/día
+              {r.bodyFat != null && <>Grasa ≈{r.bodyFat}% · </>}{r.bmi != null && <>IMC {r.bmi} · </>}{r.calories != null && <>≈{r.calories} kcal/día</>}
             </div>
           )}
         </Section>
